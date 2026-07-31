@@ -375,18 +375,18 @@ body.menu-open .mobile-menu{transform:none; opacity:1; visibility:visible}
 /* Низкий экран — телефон в альбомной ориентации или встроенный браузер
    Telegram/VK со своей панелью снизу: композиция сжимается кверху. */
 @media (max-height:760px){
-  .pin:nth-child(1){--y:20%}
-  .pin:nth-child(2){--y:18%}
-  .pin:nth-child(3){--y:30%}
-  .pin:nth-child(4){--y:39%}
-  .pin:nth-child(5){--y:40%}
+  .pin:nth-child(1){--y:25%}
+  .pin:nth-child(2){--y:23%}
+  .pin:nth-child(3){--y:36%}
+  .pin:nth-child(4){--y:45%}
+  .pin:nth-child(5){--y:46%}
 }
 @media (max-height:640px){
-  .pin:nth-child(1){--y:15%}
-  .pin:nth-child(2){--y:13%}
-  .pin:nth-child(3){--y:24%}
-  .pin:nth-child(4){--y:32%}
-  .pin:nth-child(5){--y:33%}
+  .pin:nth-child(1){--y:19%}
+  .pin:nth-child(2){--y:17%}
+  .pin:nth-child(3){--y:29%}
+  .pin:nth-child(4){--y:37%}
+  .pin:nth-child(5){--y:38%}
 }
 
 /* очередь появления */
@@ -400,7 +400,7 @@ body.menu-open .mobile-menu{transform:none; opacity:1; visibility:visible}
 /* Плашка приподнята над нижним краем: во встроенных браузерах (Telegram, VK)
    снизу лежит своя панель и перекрывает последние 60–90 px страницы. */
 .hero__cta{position:absolute; z-index:5; left:0; right:0;
-  bottom:calc(clamp(26px, 7vw, 52px) + env(safe-area-inset-bottom));
+  bottom:calc(clamp(10px, 2.6vw, 22px) + env(safe-area-inset-bottom));
   display:flex; justify-content:center; padding:0 20px}
 /* Светлая плашка со скруглением «в четверть»: спокойная, без блеска.
    Раз в 9 секунд по ней еле заметно проходит блик. */
