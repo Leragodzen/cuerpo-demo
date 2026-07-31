@@ -362,6 +362,33 @@ body.menu-open .mobile-menu{transform:none; opacity:1; visibility:visible}
 }
 @keyframes pinText{to{opacity:1; transform:none}}
 
+/* ---------- Положение выносок ----------
+   Проценты считаются от фотографии, а не от экрана. Кадр всегда выше видимой
+   области (снимок вытянутый), поэтому на низких экранах нижние выноски
+   уезжали под плашку — там они поднимаются отдельным правилом ниже. */
+.pin:nth-child(1){--x:21%; --y:27%}   /* Без боли и зажимов */
+.pin:nth-child(2){--x:79%; --y:25%}   /* Снятие стресса */
+.pin:nth-child(3){--x:36%; --y:38%}   /* Глубокое расслабление */
+.pin:nth-child(4){--x:74%; --y:48%}   /* Восстановление сил */
+.pin:nth-child(5){--x:17%; --y:49%}   /* Коррекция фигуры */
+
+/* Низкий экран — телефон в альбомной ориентации или встроенный браузер
+   Telegram/VK со своей панелью снизу: композиция сжимается кверху. */
+@media (max-height:760px){
+  .pin:nth-child(1){--y:20%}
+  .pin:nth-child(2){--y:18%}
+  .pin:nth-child(3){--y:30%}
+  .pin:nth-child(4){--y:39%}
+  .pin:nth-child(5){--y:40%}
+}
+@media (max-height:640px){
+  .pin:nth-child(1){--y:15%}
+  .pin:nth-child(2){--y:13%}
+  .pin:nth-child(3){--y:24%}
+  .pin:nth-child(4){--y:32%}
+  .pin:nth-child(5){--y:33%}
+}
+
 /* очередь появления */
 .pin:nth-child(1) *{animation-delay:.55s} .pin:nth-child(1) b{animation-delay:1.25s}
 .pin:nth-child(2) *{animation-delay:.85s} .pin:nth-child(2) b{animation-delay:1.55s}
@@ -370,14 +397,17 @@ body.menu-open .mobile-menu{transform:none; opacity:1; visibility:visible}
 .pin:nth-child(5) *{animation-delay:1.75s} .pin:nth-child(5) b{animation-delay:2.45s}
 
 /* Кнопка лежит прямо на фотографии */
-.hero__cta{position:absolute; z-index:5; left:0; right:0; bottom:clamp(20px, 5vw, 46px);
+/* Плашка приподнята над нижним краем: во встроенных браузерах (Telegram, VK)
+   снизу лежит своя панель и перекрывает последние 60–90 px страницы. */
+.hero__cta{position:absolute; z-index:5; left:0; right:0;
+  bottom:calc(clamp(26px, 7vw, 52px) + env(safe-area-inset-bottom));
   display:flex; justify-content:center; padding:0 20px}
 /* Светлая плашка со скруглением «в четверть»: спокойная, без блеска.
    Раз в 9 секунд по ней еле заметно проходит блик. */
 .hero__look{
   position:relative; overflow:hidden;
-  display:inline-flex; flex-direction:column; align-items:center; justify-content:center; gap:7px; width:min(400px, 100%);
-  padding:16px 30px 15px; border-radius:5px;
+  display:inline-flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; width:min(320px, 100%);
+  padding:14px 24px 13px; border-radius:5px;
   background:rgba(247,241,231,.95);
   color:#3A2716; font-size:13px; font-weight:500; letter-spacing:.16em; text-transform:uppercase;
   box-shadow:0 16px 44px rgba(18,10,4,.42);
@@ -1116,14 +1146,15 @@ body.menu-open .mobile-menu{transform:none; opacity:1; visibility:visible}
     <img class="hero__logo" src="assets/img/logo-light.png" width="448" height="176"
          alt="Cuerpo — мастерская по телу">
 
-    <!-- Выноски рисуются кодом: координаты точки задаются переменными --x и --y
-         в процентах от самой фотографии, поэтому их легко подвинуть. -->
+    <!-- Выноски рисуются кодом. Координаты каждой точки заданы в стилях
+         (см. «положение выносок»): проценты считаются от самой фотографии,
+         и на низких экранах они поднимаются отдельным правилом. -->
     <div class="pins" id="heroPins" aria-hidden="true">
-      <span class="pin" style="--x:21%; --y:44%"><svg class="pin__mark" viewBox="0 0 200 470"><circle class="pin__ring" cx="100" cy="100" r="95"/><line class="pin__line" x1="100" y1="100" x2="100" y2="460"/><circle class="pin__dot dot" cx="100" cy="100" r="9"/></svg><b>Без боли<br>и зажимов</b></span>
-      <span class="pin" style="--x:79%; --y:42%"><svg class="pin__mark" viewBox="0 0 200 470"><circle class="pin__ring" cx="100" cy="100" r="95"/><line class="pin__line" x1="100" y1="100" x2="100" y2="460"/><circle class="pin__dot dot" cx="100" cy="100" r="9"/></svg><b>Снятие<br>стресса</b></span>
-      <span class="pin" style="--x:36%; --y:55%"><svg class="pin__mark" viewBox="0 0 200 470"><circle class="pin__ring" cx="100" cy="100" r="95"/><line class="pin__line" x1="100" y1="100" x2="100" y2="460"/><circle class="pin__dot dot" cx="100" cy="100" r="9"/></svg><b>Глубокое<br>расслабление</b></span>
-      <span class="pin" style="--x:74%; --y:66%"><svg class="pin__mark" viewBox="0 0 200 470"><circle class="pin__ring" cx="100" cy="100" r="95"/><line class="pin__line" x1="100" y1="100" x2="100" y2="460"/><circle class="pin__dot dot" cx="100" cy="100" r="9"/></svg><b>Восстановление<br>сил</b></span>
-      <span class="pin" style="--x:17%; --y:67%"><svg class="pin__mark" viewBox="0 0 200 470"><circle class="pin__ring" cx="100" cy="100" r="95"/><line class="pin__line" x1="100" y1="100" x2="100" y2="460"/><circle class="pin__dot dot" cx="100" cy="100" r="9"/></svg><b>Коррекция<br>фигуры</b></span>
+      <span class="pin"><svg class="pin__mark" viewBox="0 0 200 470"><circle class="pin__ring" cx="100" cy="100" r="95"/><line class="pin__line" x1="100" y1="100" x2="100" y2="460"/><circle class="pin__dot dot" cx="100" cy="100" r="9"/></svg><b>Без боли<br>и зажимов</b></span>
+      <span class="pin"><svg class="pin__mark" viewBox="0 0 200 470"><circle class="pin__ring" cx="100" cy="100" r="95"/><line class="pin__line" x1="100" y1="100" x2="100" y2="460"/><circle class="pin__dot dot" cx="100" cy="100" r="9"/></svg><b>Снятие<br>стресса</b></span>
+      <span class="pin"><svg class="pin__mark" viewBox="0 0 200 470"><circle class="pin__ring" cx="100" cy="100" r="95"/><line class="pin__line" x1="100" y1="100" x2="100" y2="460"/><circle class="pin__dot dot" cx="100" cy="100" r="9"/></svg><b>Глубокое<br>расслабление</b></span>
+      <span class="pin"><svg class="pin__mark" viewBox="0 0 200 470"><circle class="pin__ring" cx="100" cy="100" r="95"/><line class="pin__line" x1="100" y1="100" x2="100" y2="460"/><circle class="pin__dot dot" cx="100" cy="100" r="9"/></svg><b>Восстановление<br>сил</b></span>
+      <span class="pin"><svg class="pin__mark" viewBox="0 0 200 470"><circle class="pin__ring" cx="100" cy="100" r="95"/><line class="pin__line" x1="100" y1="100" x2="100" y2="460"/><circle class="pin__dot dot" cx="100" cy="100" r="9"/></svg><b>Коррекция<br>фигуры</b></span>
     </div>
     </div><!-- /hero__stage -->
 
