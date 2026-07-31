@@ -12,7 +12,7 @@
 <meta name="format-detection" content="telephone=no">
 
 <!-- ЗАМЕНИТЬ на реальный домен после публикации -->
-<link rel="canonical" href="https://cuerpo-tlt.ru/">
+<link rel="canonical" href="https://leragodzen.github.io/cuerpo-massage/">
 
 <meta property="og:type" content="website">
 <meta property="og:locale" content="ru_RU">
@@ -20,7 +20,7 @@
 <meta property="og:title" content="Массажный салон Cuerpo в Тольятти | Станем скульпторами твоего тела">
 <meta property="og:description" content="Авторский оздоровительный массаж, коррекция фигуры, массаж лица и SPA-программы. Приморский бульвар 57. 5,0 на Яндекс Картах, 150+ отзывов.">
 <meta property="og:image" content="assets/img/hero.jpg">
-<meta property="og:url" content="https://cuerpo-tlt.ru/">
+<meta property="og:url" content="https://leragodzen.github.io/cuerpo-massage/">
 
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%2343301F'/%3E%3Ctext x='50' y='72' font-family='Georgia,serif' font-size='64' font-style='italic' fill='%238FBFAC' text-anchor='middle'%3EC%3C/text%3E%3C/svg%3E">
 
@@ -176,6 +176,15 @@ h1,h2,h3,h4{font-family:var(--ff-display); font-weight:400; line-height:1.12; ma
 .btn--sm{padding:11px 22px; font-size:12px}
 .btn--full{width:100%}
 .btn:disabled{opacity:.5; cursor:not-allowed; transform:none}
+/* Отклик на нажатие. На телефоне наведения курсора не существует, поэтому без
+   :active палец нажимает — и визуально ничего не происходит. Короткое
+   «вдавливание» читается как отзывчивость интерфейса. */
+.btn:not(:disabled):active{transform:translateY(1px) scale(.985); transition-duration:.08s}
+.btn--primary:not(:disabled):active{box-shadow:0 5px 16px rgba(95,122,80,.26)}
+.header__cta:active{transform:translateY(1px) scale(.985); transition-duration:.08s}
+.hero__look:active{transform:scale(.99); transition-duration:.08s}
+.svc:active{transform:scale(.995); transition-duration:.08s}
+.dir__hd:active{filter:brightness(1.14); transition-duration:.08s}
 
 .link-u{
   display:inline-flex; align-items:center; gap:9px; font-size:13.5px; font-weight:400;
@@ -367,8 +376,8 @@ body.menu-open .mobile-menu{transform:none; opacity:1; visibility:visible}
    Раз в 9 секунд по ней еле заметно проходит блик. */
 .hero__look{
   position:relative; overflow:hidden;
-  display:inline-flex; align-items:center; justify-content:center; gap:12px; width:min(400px, 100%);
-  padding:19px 30px; border-radius:5px;
+  display:inline-flex; flex-direction:column; align-items:center; justify-content:center; gap:7px; width:min(400px, 100%);
+  padding:16px 30px 15px; border-radius:5px;
   background:rgba(247,241,231,.95);
   color:#3A2716; font-size:13px; font-weight:500; letter-spacing:.16em; text-transform:uppercase;
   box-shadow:0 16px 44px rgba(18,10,4,.42);
@@ -384,6 +393,13 @@ body.menu-open .mobile-menu{transform:none; opacity:1; visibility:visible}
 @keyframes ctaIn{from{opacity:0; transform:translateY(14px)} to{opacity:1; transform:none}}
 .hero__look:hover{background:#FFFDF8; transform:translateY(-2px); box-shadow:0 20px 52px rgba(18,10,4,.5)}
 .hero__look span,.hero__look svg{position:relative; z-index:1; flex:none}
+.hero__look__row{display:inline-flex; align-items:center; justify-content:center; gap:12px}
+/* Цена — тихая вторая строка внутри плашки: не спорит с кнопкой,
+   но отвечает на главный вопрос сразу на первом экране. */
+.hero__price{
+  font-family:var(--ff-text); font-weight:400; font-size:11.5px; letter-spacing:.03em;
+  text-transform:none; color:#6B5842; white-space:nowrap;
+}
 
 @media (prefers-reduced-motion: reduce){
   .pin__ring{stroke-dashoffset:0} .pin__line{transform:none} .pin__dot,.pin b{opacity:1; transform:none}
@@ -600,7 +616,12 @@ body.menu-open .mobile-menu{transform:none; opacity:1; visibility:visible}
 .dir__intro b{color:var(--ink); font-weight:400}
 .dir__list{padding:16px 22px 20px; display:grid; gap:12px}
 .dir__more{display:none; gap:12px}
-.dir__b.is-open .dir__more{display:grid}
+/* Скрытые услуги проявляются мягко, а не возникают рывком */
+.dir__b.is-open .dir__more{display:grid; animation:dirReveal .4s cubic-bezier(.2,.7,.3,1) both}
+@keyframes dirReveal{from{opacity:0; transform:translateY(-7px)} to{opacity:1; transform:none}}
+@media (prefers-reduced-motion:reduce){
+  .dir__b.is-open .dir__more{animation:none}
+}
 .dir__btn{margin:0 22px 22px; width:calc(100% - 44px)}
 
 .svc{
@@ -1103,8 +1124,14 @@ body.menu-open .mobile-menu{transform:none; opacity:1; visibility:visible}
     <span class="hero__dim" id="heroDim" aria-hidden="true"></span>
 
     <div class="hero__cta">
-      <a class="hero__look" href="#services"><span>Смотреть услуги</span>
-        <svg width="15" height="9" viewBox="0 0 15 9" fill="none" aria-hidden="true"><path d="M0 4.5h13M9.5 1L13 4.5 9.5 8" stroke="currentColor" stroke-width="1.6"/></svg>
+      <!-- Цена прямо на первом экране: человек из поиска получает ответ на
+           главный вопрос, не пролистывая до каталога. Строка лежит внутри
+           светлой плашки — на низких экранах она не сталкивается с выносками. -->
+      <a class="hero__look" href="#services">
+        <span class="hero__look__row"><span>Смотреть услуги</span>
+          <svg width="15" height="9" viewBox="0 0 15 9" fill="none" aria-hidden="true"><path d="M0 4.5h13M9.5 1L13 4.5 9.5 8" stroke="currentColor" stroke-width="1.6"/></svg>
+        </span>
+        <span class="hero__price">Массаж от 1 200 ₽ · сеанс 30–90 минут</span>
       </a>
     </div>
   </div>
@@ -1151,7 +1178,7 @@ body.menu-open .mobile-menu{transform:none; opacity:1; visibility:visible}
           <svg viewBox="0 0 24 24"><path d="M12 2.5l7.5 3.7v5.6c0 4.7-3.2 8-7.5 9.4-4.3-1.4-7.5-4.7-7.5-9.4V6.2L12 2.5z"/><path d="M9 12.2l2 2 4-4"/></svg>
         </span>
         <b>Мастера с мед. образованием</b>
-        <p>Знание анатомии и регулярное повышение квалификации. Мы ищем первопричину, а не разминаем спину наугад.</p>
+        <p>Знание анатомии и регулярное повышение квалификации. Мастер понимает, что именно происходит с вашими мышцами.</p>
       </article>
 
       <article class="card reveal d2">
@@ -1180,13 +1207,13 @@ body.menu-open .mobile-menu{transform:none; opacity:1; visibility:visible}
   <div class="container">
     <div class="head reveal">
       <p class="eyebrow">О мастерской</p>
-      <h2 class="h2">Массаж, после которого тело <span class="i accent">возвращается к себе</span></h2>
+      <h2 class="h2">Почему мы называем мастеров <span class="i accent">скульпторами</span></h2>
     </div>
 
     <div class="about__grid">
       <div class="about__text reveal">
         <p>Cuerpo в переводе с испанского — «тело». Мы работаем с ним как скульпторы: снимаем лишнее напряжение, возвращаем форму и лёгкость, помогаем телу вспомнить своё здоровое состояние. Поэтому наши мастера называются скульпторами, а сеанс — не процедурой из прайса, а работой с конкретным человеком.</p>
-        <p>Мы не берём в команду случайных людей. Каждый мастер проходит обучение на базе салона, регулярно повышает квалификацию и умеет искать первопричину проблемы, а не просто разминать спину. Перед сеансом мастер уточняет запрос, состояние и зоны, которые беспокоят, — и уже под них подбирает технику и силу нажима.</p>
+        <p>Мы не берём в команду случайных людей: каждый мастер проходит обучение на базе салона и регулярно повышает квалификацию. Перед сеансом он уточняет запрос, состояние и зоны, которые беспокоят, — и уже под них подбирает технику и силу нажима.</p>
         <p>Более 1000 клиентов, 5,0 на Яндекс Картах и награда «Хорошее место» — для нас это про одно и то же: к нам возвращаются, потому что после сеанса телу действительно легче.</p>
       </div>
 
@@ -1286,6 +1313,121 @@ body.menu-open .mobile-menu{transform:none; opacity:1; visibility:visible}
 
     <!-- Когда салон пришлёт фото «до/после» тела — сюда вернётся сетка карточек -->
     <p class="ba-note reveal">Изменения заметны уже после первых сеансов —<br><b>и становятся выразительнее от визита к визиту</b></p>
+  </div>
+</section>
+
+<!-- ============================================================
+     ОТЗЫВЫ
+     ============================================================ -->
+<section class="section" id="reviews">
+  <div class="container">
+    <div class="head reveal">
+      <p class="eyebrow">Отзывы клиентов</p>
+      <h2 class="h2">Нам доверяют:<br><span class="i accent">5,0</span> и более 150 отзывов на Яндексе</h2>
+    </div>
+
+    <div class="rev-top reveal">
+      <div class="rev-top__score">
+        <span class="rev-top__num">5,0</span>
+        <div class="rev-top__meta">
+          <span class="stars">
+            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </span>
+          <span>Более 150 отзывов и 180 оценок на Яндекс Картах</span>
+        </div>
+      </div>
+      <div class="rev-top__award">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="9" r="6"/><path d="M8 14l-2 7 6-3 6 3-2-7"/></svg>
+        <span><b>«Хорошее место 2026»</b><br>награда Яндекс Карт</span>
+      </div>
+      <div class="rev-top__cta">
+        <a class="btn btn--primary btn--sm" href="#" data-yandex target="_blank" rel="noopener">Отзывы на Яндексе</a>
+        <a class="btn btn--ghost btn--sm" href="#" data-2gis target="_blank" rel="noopener">Отзывы в 2ГИС</a>
+      </div>
+    </div>
+
+    <div class="rev-scroll" id="revScroll">
+      <article class="rev">
+        <div class="rev__head">
+          <span class="rev__ava">Н</span>
+          <div><p class="rev__name">Наталья Сизова</p><p class="rev__date">24 февраля · Знаток города 2 уровня</p></div>
+        </div>
+        <span class="stars">
+          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        </span>
+        <p class="rev__text" style="margin-top:12px">Замечательный салон, комфортная, уютная расслабляющая обстановка. Приятный, внимательный персонал. Массажисты высший класс: с вниманием и краткими комментариями творят чудо массажа. Дали рекомендации избавления от проблем не только с помощью массажных техник — Светлана с Мариной посоветовали комплексы упражнений ЛФК для расслабления и укрепления мышц. Атмосферное, приятное место восстановления и отдыха. Рекомендую.</p>
+        <p class="rev__src">Отзыв с Яндекс Карт</p>
+      </article>
+
+      <article class="rev">
+        <div class="rev__head">
+          <span class="rev__ava">В</span>
+          <div><p class="rev__name">Виктория Чугурова</p><p class="rev__date">15 февраля · Знаток города 6 уровня</p></div>
+        </div>
+        <span class="stars">
+          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        </span>
+        <p class="rev__text" style="margin-top:12px">Были 14 февраля, очень красиво была украшена комната к празднику. В помещении чисто, красиво, аккуратно. Обслуживание на высшем уровне: вежливый персонал, массажисты — профессионалы. Самочувствие после массажа чудесное.</p>
+        <p class="rev__src">Отзыв с Яндекс Карт</p>
+      </article>
+
+      <article class="rev">
+        <div class="rev__head">
+          <span class="rev__ava">Д</span>
+          <div><p class="rev__name">Дмитрий</p><p class="rev__date">12 февраля · Знаток города 3 уровня</p></div>
+        </div>
+        <span class="stars">
+          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        </span>
+        <p class="rev__text" style="margin-top:12px">Посетили данный массажный салон с девушкой по совету друзей. Выбрали программу для двоих «Для влюблённых». Не описать словами, как же здорово нам промяли всё тело, как согнали с мышц усталость и наполнили наше тело новой энергией и новыми силами. Тело как будто перезагрузилось! Спасибо мастерам за профессионализм, чуткие и уверенные действия и что прислушивались к нам во время всего процесса.</p>
+        <p class="rev__src">Отзыв с Яндекс Карт</p>
+      </article>
+
+      <article class="rev">
+        <div class="rev__head">
+          <span class="rev__ava">Е</span>
+          <div><p class="rev__name">Евгений</p><p class="rev__date">Отзыв с Яндекс Карт</p></div>
+        </div>
+        <span class="stars">
+          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        </span>
+        <p class="rev__text" style="margin-top:12px">Была уже неоднократно. Первый раз приходили с мужем на спа-массаж, были у Марины и Алины, остались довольны отношением персонала и качеством работы. Сейчас регулярно хожу на массаж спины к мастеру Сергею. Крутой специалист, всегда можно поговорить, послушать. Сеансы проходят с лёгкостью, а главное — спина не болит. Тем, у кого проблемы со спиной, очень рекомендую: здесь все мастера очень качественно делают свою работу.</p>
+        <p class="rev__src">Отзыв с Яндекс Карт</p>
+      </article>
+    </div>
+
+    <div class="rev-nav">
+      <button id="revPrev" aria-label="Предыдущий отзыв"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <button id="revNext" aria-label="Следующий отзыв"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+    </div>
+
+    <!-- МЕСТО ПОД ВИДЖЕТ ЖИВЫХ ОТЗЫВОВ.
+         Чтобы отзывы подтягивались из Яндекс Карт и 2ГИС автоматически,
+         зарегистрируйте карточку салона на repometr.com и вставьте код виджета
+         в блок ниже вместо строки с многоточием, сняв обрамляющие теги комментария.
+         Карточки отзывов выше стоит оставить как подстраховку.
+         Подробная инструкция — в README.md, раздел «Живые отзывы». -->
+    <!-- <div class="rwidget reveal"> …код виджета repometr… </div> -->
   </div>
 </section>
 
@@ -1552,6 +1694,7 @@ body.menu-open .mobile-menu{transform:none; opacity:1; visibility:visible}
   </div>
 </section>
 
+
 <!-- ============================================================
      ПОДАРОЧНЫЙ СЕРТИФИКАТ
      ============================================================ -->
@@ -1808,120 +1951,6 @@ body.menu-open .mobile-menu{transform:none; opacity:1; visibility:visible}
   </div>
 </section>
 
-<!-- ============================================================
-     ОТЗЫВЫ
-     ============================================================ -->
-<section class="section" id="reviews">
-  <div class="container">
-    <div class="head reveal">
-      <p class="eyebrow">Отзывы клиентов</p>
-      <h2 class="h2">Нам доверяют:<br><span class="i accent">5,0</span> и более 150 отзывов на Яндексе</h2>
-    </div>
-
-    <div class="rev-top reveal">
-      <div class="rev-top__score">
-        <span class="rev-top__num">5,0</span>
-        <div class="rev-top__meta">
-          <span class="stars">
-            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          </span>
-          <span>Более 150 отзывов и 180 оценок на Яндекс Картах</span>
-        </div>
-      </div>
-      <div class="rev-top__award">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="9" r="6"/><path d="M8 14l-2 7 6-3 6 3-2-7"/></svg>
-        <span><b>«Хорошее место 2026»</b><br>награда Яндекс Карт</span>
-      </div>
-      <div class="rev-top__cta">
-        <a class="btn btn--primary btn--sm" href="#" data-yandex target="_blank" rel="noopener">Отзывы на Яндексе</a>
-        <a class="btn btn--ghost btn--sm" href="#" data-2gis target="_blank" rel="noopener">Отзывы в 2ГИС</a>
-      </div>
-    </div>
-
-    <div class="rev-scroll" id="revScroll">
-      <article class="rev">
-        <div class="rev__head">
-          <span class="rev__ava">Н</span>
-          <div><p class="rev__name">Наталья Сизова</p><p class="rev__date">24 февраля · Знаток города 2 уровня</p></div>
-        </div>
-        <span class="stars">
-          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-        </span>
-        <p class="rev__text" style="margin-top:12px">Замечательный салон, комфортная, уютная расслабляющая обстановка. Приятный, внимательный персонал. Массажисты высший класс: с вниманием и краткими комментариями творят чудо массажа. Дали рекомендации избавления от проблем не только с помощью массажных техник — Светлана с Мариной посоветовали комплексы упражнений ЛФК для расслабления и укрепления мышц. Атмосферное, приятное место восстановления и отдыха. Рекомендую.</p>
-        <p class="rev__src">Отзыв с Яндекс Карт</p>
-      </article>
-
-      <article class="rev">
-        <div class="rev__head">
-          <span class="rev__ava">В</span>
-          <div><p class="rev__name">Виктория Чугурова</p><p class="rev__date">15 февраля · Знаток города 6 уровня</p></div>
-        </div>
-        <span class="stars">
-          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-        </span>
-        <p class="rev__text" style="margin-top:12px">Были 14 февраля, очень красиво была украшена комната к празднику. В помещении чисто, красиво, аккуратно. Обслуживание на высшем уровне: вежливый персонал, массажисты — профессионалы. Самочувствие после массажа чудесное.</p>
-        <p class="rev__src">Отзыв с Яндекс Карт</p>
-      </article>
-
-      <article class="rev">
-        <div class="rev__head">
-          <span class="rev__ava">Д</span>
-          <div><p class="rev__name">Дмитрий</p><p class="rev__date">12 февраля · Знаток города 3 уровня</p></div>
-        </div>
-        <span class="stars">
-          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-        </span>
-        <p class="rev__text" style="margin-top:12px">Посетили данный массажный салон с девушкой по совету друзей. Выбрали программу для двоих «Для влюблённых». Не описать словами, как же здорово нам промяли всё тело, как согнали с мышц усталость и наполнили наше тело новой энергией и новыми силами. Тело как будто перезагрузилось! Спасибо мастерам за профессионализм, чуткие и уверенные действия и что прислушивались к нам во время всего процесса.</p>
-        <p class="rev__src">Отзыв с Яндекс Карт</p>
-      </article>
-
-      <article class="rev">
-        <div class="rev__head">
-          <span class="rev__ava">Е</span>
-          <div><p class="rev__name">Евгений</p><p class="rev__date">Отзыв с Яндекс Карт</p></div>
-        </div>
-        <span class="stars">
-          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-        </span>
-        <p class="rev__text" style="margin-top:12px">Была уже неоднократно. Первый раз приходили с мужем на спа-массаж, были у Марины и Алины, остались довольны отношением персонала и качеством работы. Сейчас регулярно хожу на массаж спины к мастеру Сергею. Крутой специалист, всегда можно поговорить, послушать. Сеансы проходят с лёгкостью, а главное — спина не болит. Тем, у кого проблемы со спиной, очень рекомендую: здесь все мастера очень качественно делают свою работу.</p>
-        <p class="rev__src">Отзыв с Яндекс Карт</p>
-      </article>
-    </div>
-
-    <div class="rev-nav">
-      <button id="revPrev" aria-label="Предыдущий отзыв"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
-      <button id="revNext" aria-label="Следующий отзыв"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
-    </div>
-
-    <!-- МЕСТО ПОД ВИДЖЕТ ЖИВЫХ ОТЗЫВОВ.
-         Чтобы отзывы подтягивались из Яндекс Карт и 2ГИС автоматически,
-         зарегистрируйте карточку салона на repometr.com и вставьте код виджета
-         в блок ниже вместо строки с многоточием, сняв обрамляющие теги комментария.
-         Карточки отзывов выше стоит оставить как подстраховку.
-         Подробная инструкция — в README.md, раздел «Живые отзывы». -->
-    <!-- <div class="rwidget reveal"> …код виджета repometr… </div> -->
-  </div>
-</section>
 
 <!-- ============================================================
      КАК ПРОХОДИТ ВИЗИТ
@@ -2288,8 +2317,8 @@ body.menu-open .mobile-menu{transform:none; opacity:1; visibility:visible}
   "alternateName": "Массажный салон Cuerpo Тольятти",
   "description": "Массажный салон и мастерская по телу Cuerpo в Тольятти: авторский оздоровительный массаж, коррекция фигуры, массаж лица, SPA-программы для двоих, кедровая бочка и сауна с гималайской солью.",
   "slogan": "Станем скульпторами твоего тела",
-  "url": "https://cuerpo-tlt.ru/",
-  "image": "https://cuerpo-tlt.ru/assets/img/hero.jpg",
+  "url": "https://leragodzen.github.io/cuerpo-massage/",
+  "image": "https://leragodzen.github.io/cuerpo-massage/assets/img/hero.jpg",
   "telephone": "+7-927-892-30-13",
   "priceRange": "900–6500 ₽",
   "currenciesAccepted": "RUB",
@@ -2739,6 +2768,38 @@ function setupRail(wrap, rail, prev, next){
   window.addEventListener('mouseup', up);
   window.addEventListener('touchend', up);
   slider.addEventListener('click', function(e){ setPos(e.clientX); });
+
+  /* Когда слайдер впервые появляется на экране, ползунок сам проходит короткий
+     путь и возвращается — без подсказки словами человек понимает, что его
+     можно тянуть. Один раз за визит; при первом же касании проход прерывается. */
+  var swept = false;
+  function setPercent(p){
+    after.style.clipPath = 'inset(0 0 0 ' + p + '%)';
+    handle.style.left = p + '%';
+  }
+  function sweep(){
+    if (swept) return;
+    swept = true;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var t0 = null, dur = 1500, from = 50, to = 72;
+    function step(ts){
+      if (dragging) { setPercent(from); return; }
+      if (t0 === null) t0 = ts;
+      var t = Math.min((ts - t0) / dur, 1);
+      /* туда и обратно, с мягким замедлением на краях */
+      var e = t < .5 ? t * 2 : (1 - t) * 2;
+      e = e * e * (3 - 2 * e);
+      setPercent(from + (to - from) * e);
+      if (t < 1) requestAnimationFrame(step); else setPercent(from);
+    }
+    requestAnimationFrame(step);
+  }
+  if ('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(entries){
+      if (entries[0].isIntersecting){ io.disconnect(); setTimeout(sweep, 450); }
+    }, {threshold:.55});
+    io.observe(slider);
+  }
 })();
 
 /* ---------- Карусель отзывов ---------- */
