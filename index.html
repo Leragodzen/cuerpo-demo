@@ -225,6 +225,9 @@ h1,h2,h3,h4{font-family:var(--ff-display); font-weight:400; line-height:1.12; ma
   text-transform:uppercase; font-weight:500; transition:background .25s, transform .25s; white-space:nowrap;
 }
 .header__cta:hover{background:#A2CDBC; transform:translateY(-1px)}
+/* На мобильном, пока внизу виден плавающий бар записи, кнопка в шапке прячется —
+   без этого на экране одновременно две одинаковые по смыслу кнопки «Записаться». */
+@media (max-width:999px){ body.cta-in-mbar .header__cta{display:none} }
 
 .burger{width:38px; height:38px; display:grid; place-items:center; border-radius:50%; border:1px solid rgba(245,238,225,.3); transition:.3s; flex:none}
 .burger:hover{border-color:var(--cream)}
@@ -485,9 +488,12 @@ body.menu-open .mobile-menu{transform:none; opacity:1; visibility:visible}
 
 .ba-slider{
   position:relative; border-radius:var(--r-l); overflow:hidden; box-shadow:var(--shadow-l);
-  aspect-ratio:1/1; background:var(--bg-2); touch-action:pan-y; user-select:none; cursor:ew-resize;
+  aspect-ratio:3/4; background:var(--bg-2); touch-action:pan-y; user-select:none; cursor:ew-resize;
 }
-.ba-slider img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; pointer-events:none}
+/* Единая точка привязки кропа (не центр) — оба фото обрезаются по одной и той
+   же линии, а более вытянутый кадр (3/4 вместо 1/1) меньше обрезает по высоте,
+   поэтому разница в масштабе кадрирования между «до» и «после» не усиливается кропом. */
+.ba-slider img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:50% 32%; pointer-events:none}
 .ba-slider__after{clip-path:inset(0 0 0 50%)}
 .ba-slider__handle{
   position:absolute; top:0; bottom:0; left:50%; width:2px; background:rgba(255,255,255,.92);
@@ -1241,9 +1247,9 @@ body.menu-open .mobile-menu{transform:none; opacity:1; visibility:visible}
         <div class="ba-slider" id="baSlider">
           <span class="ba-tag ba-tag--l">До</span>
           <span class="ba-tag ba-tag--r">После</span>
-          <img src="assets/img/ba-face-before.jpg" width="540" height="1070" loading="lazy"
+          <img src="assets/img/ba-face-before.jpg" width="313" height="620" loading="lazy"
                alt="Лицо клиентки до сеанса массажа лица в салоне Cuerpo в Тольятти">
-          <img class="ba-slider__after" id="baAfter" src="assets/img/ba-face-after.jpg" width="540" height="1070" loading="lazy"
+          <img class="ba-slider__after" id="baAfter" src="assets/img/ba-face-after.jpg" width="313" height="620" loading="lazy"
                alt="Лицо клиентки после одного сеанса массажа лица в Тольятти — подтянутый овал и уменьшение отёчности">
           <div class="ba-slider__handle" id="baHandle">
             <span class="ba-slider__knob"><svg viewBox="0 0 24 24"><path d="M9 6l-5 6 5 6M15 6l5 6-5 6"/></svg></span>
@@ -2444,34 +2450,58 @@ var heroDim  = $('#heroDim');
 var heroStage = $('#heroStage');
 var heroLogo  = $('.hero__logo');
 /* Анимация появления с fill-mode перебивает inline-стили, поэтому снимаем её,
-   как только логотип проявился — дальше им управляет прокрутка. */
-if (heroLogo) heroLogo.addEventListener('animationend', function(){ heroLogo.style.animation = 'none'; });
+   как только логотип проявился — дальше им управляет прокрутка. Если
+   animationend почему-то не придёт (вкладка была свёрнута/в фоне), подчищаем
+   по таймеру — иначе логотип может застыть в промежуточном кадре анимации. */
+if (heroLogo){
+  var clearLogoAnim = function(){ heroLogo.style.animation = 'none'; };
+  heroLogo.addEventListener('animationend', clearLogoAnim);
+  setTimeout(clearLogoAnim, 2000);
+}
 var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 function onScroll(){
   var s = window.scrollY || document.documentElement.scrollTop;
-  if (mbar) mbar.classList.toggle('is-visible', s > 140);
+  var mbarVisible = s > 140;
+  if (mbar) mbar.classList.toggle('is-visible', mbarVisible);
+  /* Кнопка «Записаться» в шапке прячется на мобильном ровно тогда, когда
+     появляется нижний плавающий бар — иначе на экране одновременно две
+     одинаковые по смыслу кнопки. */
+  document.body.classList.toggle('cta-in-mbar', mbarVisible);
 
   /* Снимок медленно уезжает вверх внутри неподвижной рамки, логотип и выноски —
      быстрее и с затуханием. Рамка стоит на месте, поэтому под первым экраном
      не открывается пустая полоса перед блоком с рейтингом. */
   if (heroPic && !reduceMotion){
-    var h = heroPic.offsetHeight || 1;
-    var k = Math.min(s / h, 1);
-    if (heroStage) heroStage.style.transform = 'translate3d(0,' + (-k * 45) + 'px,0)';
+    /* На самом верху страницы положение всегда нейтральное и не зависит от
+       offsetHeight — на мобильных в момент первого рендера (пока адресная
+       строка браузера ещё не свернулась) он может быть посчитан неточно,
+       что даёт случайный сдвиг сцены/логотипа/выносок на первом кадре. */
+    var k = 0;
+    if (s > 0){
+      var h = heroPic.offsetHeight || 1;
+      k = Math.min(s / h, 1);
+    }
+    if (heroStage) heroStage.style.transform = k ? 'translate3d(0,' + (-k * 45) + 'px,0)' : 'none';
     if (heroDim) heroDim.style.opacity = String(k * 0.3);
     if (heroLogo){
-      heroLogo.style.transform = 'translate3d(0,' + (-k * 70) + 'px,0)';
+      heroLogo.style.transform = k ? 'translate3d(0,' + (-k * 70) + 'px,0)' : 'none';
       heroLogo.style.opacity   = String(Math.max(0, 1 - k * 2));
     }
     if (heroPins){
-      heroPins.style.transform = 'translate3d(0,' + (-k * 130) + 'px,0)';
+      heroPins.style.transform = k ? 'translate3d(0,' + (-k * 130) + 'px,0)' : 'none';
       heroPins.style.opacity   = String(Math.max(0, 1 - k * 2.4));
     }
   }
 }
 window.addEventListener('scroll', onScroll, {passive:true});
-onScroll();
+/* Первый вызов откладываем на кадр вперёд — браузер успевает завершить
+   первый layout, иначе offsetHeight ещё не окончательный. Высота вьюпорта на
+   мобильных дополнительно меняется при сворачивании/разворачивании адресной
+   строки — это не событие scroll, поэтому пересчитываем и по resize. */
+requestAnimationFrame(onScroll);
+window.addEventListener('resize', onScroll, {passive:true});
+if (window.visualViewport) window.visualViewport.addEventListener('resize', onScroll, {passive:true});
 
 /* ---------- Мобильное меню ---------- */
 var burger = $('#burger');
