@@ -300,7 +300,12 @@ body.menu-open .mobile-menu{transform:none; opacity:1; visibility:visible}
    на любой ширине они остаются на тех же местах кадра.
    Ширина = «накрыть рамку» + 24px запаса на параллакс. */
 .hero__stage{
-  position:absolute; left:50%; top:10%; translate:-50% -10%;
+  /* --anchor: какая точка снимка совмещается с той же точкой рамки.
+     Снимок сильно вытянутый, в рамку влезает не весь: чем больше значение,
+     тем ниже участок кадра мы видим. На невысоких экранах его приходится
+     увеличивать, иначе мужчина остаётся ниже нижнего края. */
+  --anchor:10%;
+  position:absolute; left:50%; top:var(--anchor); translate:-50% calc(0% - var(--anchor));
   width:calc(max(100%, var(--frame-h) * 852 / 1671) + 24px);
   aspect-ratio:852 / 1671;
   will-change:transform;
@@ -374,19 +379,16 @@ body.menu-open .mobile-menu{transform:none; opacity:1; visibility:visible}
 
 /* Низкий экран — телефон в альбомной ориентации или встроенный браузер
    Telegram/VK со своей панелью снизу: композиция сжимается кверху. */
+/* Невысокий экран: кадр сдвигается ниже по снимку (--anchor), логотип
+   опускается следом, а выноски остаются на своих местах фотографии —
+   в рамке они за счёт этого сами оказываются ниже. */
 @media (max-height:760px){
-  .pin:nth-child(1){--y:25%}
-  .pin:nth-child(2){--y:23%}
-  .pin:nth-child(3){--y:36%}
-  .pin:nth-child(4){--y:45%}
-  .pin:nth-child(5){--y:46%}
+  .hero__stage{--anchor:26%}
+  .hero__stage>img.hero__logo{top:9%}
 }
 @media (max-height:640px){
-  .pin:nth-child(1){--y:19%}
-  .pin:nth-child(2){--y:17%}
-  .pin:nth-child(3){--y:29%}
-  .pin:nth-child(4){--y:37%}
-  .pin:nth-child(5){--y:38%}
+  .hero__stage{--anchor:40%}
+  .hero__stage>img.hero__logo{top:15%}
 }
 
 /* очередь появления */
