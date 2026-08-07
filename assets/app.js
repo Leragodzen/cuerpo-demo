@@ -38,6 +38,41 @@ var CONFIG = {
 var $  = function(s, c){ return (c||document).querySelector(s); };
 var $$ = function(s, c){ return Array.prototype.slice.call((c||document).querySelectorAll(s)); };
 
+/* ---------- Онлайн-запись ----------
+   Формы с телефоном на сайте нет: заявки принимает YClients, поэтому сайт
+   не собирает персональные данные. Кнопкам «Записаться» адрес проставляется
+   здесь — из CONFIG.booking и карт CONFIG.bookingByService / bookingByMaster.
+   Так ссылка не размазана по разметке: чтобы завести отдельную ссылку на
+   услугу или мастера, достаточно дописать строку в CONFIG.
+
+   Блок стоит первым намеренно: запись — главное действие на сайте, и оно не
+   должно зависеть от того, что случится ниже по файлу. Ошибка в карусели или
+   в лайтбоксе не оставит кнопки «Записаться» без адреса. */
+function bookingUrl(el){
+  var svc = el.getAttribute('data-service');
+  var mst = el.getAttribute('data-master');
+  return (svc && CONFIG.bookingByService[svc])
+      || (mst && CONFIG.bookingByMaster[mst])
+      || CONFIG.booking;
+}
+$$('[data-book]').forEach(function(el){
+  el.setAttribute('href', bookingUrl(el));
+  el.setAttribute('target', '_blank');
+  el.setAttribute('rel', 'noopener');
+});
+
+/* Мобильное меню поверх страницы осталось бы открытым, когда пользователь
+   вернётся из YClients назад — закрываем его сразу. Цель Метрики open_yclients
+   ставит общий обработчик ссылок выше, дублировать не нужно. */
+document.addEventListener('click', function(e){
+  if (e.target.closest && e.target.closest('[data-book]')) closeMenu();
+});
+
+/* Esc закрывает мобильное меню */
+document.addEventListener('keydown', function(e){
+  if (e.key === 'Escape' && document.body.classList.contains('menu-open')) closeMenu();
+});
+
 /* ---------- Цели Метрики ----------
    Молча ничего не делает, пока номер счётчика не вписан в <head>. */
 function goal(name){
@@ -214,24 +249,6 @@ if ('IntersectionObserver' in window){
     if (!open) box.scrollIntoView({behavior:'smooth', block:'start'});
   });
 })();
-
-    g.items.forEach(function(n){ cat[n] = 1; });
-  });
-  var ld = {};
-  $$('script[type="application/ld+json"]').forEach(function(s){
-    var d; try { d = JSON.parse(s.textContent); } catch(e){ return; }
-    var list = d.hasOfferCatalog && d.hasOfferCatalog.itemListElement;
-    (list || []).forEach(function(o){
-      if (o.itemOffered && o.itemOffered.name) ld[o.itemOffered.name] = o.price || '';
-    });
-  });
-  var noOffer = Object.keys(cat).filter(function(n){ return !(n in ld); });
-  var noCard  = Object.keys(ld).filter(function(n){ return !(n in cat); });
-  console.log('Услуг в каталоге:', Object.keys(cat).length, '· офферов в разметке:', Object.keys(ld).length);
-  if (noOffer.length) console.warn('Нет оффера в JSON-LD:', noOffer);
-  if (noCard.length)  console.warn('Оффер без карточки в каталоге:', noCard);
-  if (!noOffer.length && !noCard.length) console.log('Каталог и микроразметка совпадают.');
-};
 
 /* ---------- Ленты, которые листаются вбок (интерьер и мастера) ---------- */
 function setupRail(wrap, rail, prev, next){
@@ -415,37 +432,6 @@ function setupRail(wrap, rail, prev, next){
   $('#revNext').addEventListener('click', function(){ box.scrollBy({left: step(), behavior:'smooth'}); });
   $('#revPrev').addEventListener('click', function(){ box.scrollBy({left:-step(), behavior:'smooth'}); });
 })();
-
-/* ---------- Онлайн-запись ----------
-   Формы с телефоном на сайте нет: заявки принимает YClients, поэтому сайт
-   не собирает персональные данные. Кнопкам «Записаться» адрес проставляется
-   здесь — из CONFIG.booking и карт CONFIG.bookingByService / bookingByMaster.
-   Так ссылка не размазана по разметке: чтобы завести отдельную ссылку на
-   услугу или мастера, достаточно дописать строку в CONFIG. */
-function bookingUrl(el){
-  var svc = el.getAttribute('data-service');
-  var mst = el.getAttribute('data-master');
-  return (svc && CONFIG.bookingByService[svc])
-      || (mst && CONFIG.bookingByMaster[mst])
-      || CONFIG.booking;
-}
-$$('[data-book]').forEach(function(el){
-  el.setAttribute('href', bookingUrl(el));
-  el.setAttribute('target', '_blank');
-  el.setAttribute('rel', 'noopener');
-});
-
-/* Мобильное меню поверх страницы осталось бы открытым, когда пользователь
-   вернётся из YClients назад — закрываем его сразу. Цель Метрики open_yclients
-   ставит общий обработчик ссылок выше, дублировать не нужно. */
-document.addEventListener('click', function(e){
-  if (e.target.closest && e.target.closest('[data-book]')) closeMenu();
-});
-
-/* Esc закрывает мобильное меню */
-document.addEventListener('keydown', function(e){
-  if (e.key === 'Escape' && document.body.classList.contains('menu-open')) closeMenu();
-});
 
 /* ---------- Плавная прокрутка с учётом шапки ---------- */
 document.addEventListener('click', function(e){
