@@ -8,24 +8,28 @@
 
 /* ---------- НАСТРОЙКИ ---------- */
 var CONFIG = {
-  /* Ссылка на карточку салона на Яндекс Картах (кнопки «Читать все отзывы»).
-     Замените на прямую ссылку карточки организации. */
-  yandexUrl: 'https://yandex.ru/maps/240/tolyatti/?ll=49.251250%2C53.508350&z=17&text=Cuerpo%20%D0%BC%D0%B0%D1%81%D1%81%D0%B0%D0%B6%20%D0%A2%D0%BE%D0%BB%D1%8C%D1%8F%D1%82%D1%82%D0%B8%20%D0%9F%D1%80%D0%B8%D0%BC%D0%BE%D1%80%D1%81%D0%BA%D0%B8%D0%B9%20%D0%B1%D1%83%D0%BB%D1%8C%D0%B2%D0%B0%D1%80%2C%2057',
+  /* ОНЛАЙН-ЗАПИСЬ — единственное место, где живёт ссылка на YClients.
+     Все кнопки «Записаться» на сайте берут адрес отсюда: в разметке ссылка
+     не продублирована ни разу, поэтому поменять её можно одной правкой. */
+  booking: 'https://n908364.yclients.com/company/845911/personal/menu?o=',
+
+  /* Персональные ссылки на конкретные услуги. Пока пусто — все кнопки ведут
+     на общий каталог записи выше. Когда появятся прямые ссылки YClients,
+     допишите строки сюда, ключ — имя услуги из tools/data.py (data-service):
+        'Классический массаж спины': 'https://n908364.yclients.com/company/845911/personal/menu?o=s12345',
+     Разметку править не нужно: скрипт подставит адрес сам. */
+  bookingByService: {},
+
+  /* То же самое для мастеров (кнопки «Записаться» в блоке команды),
+     ключ — имя мастера из data-master. */
+  bookingByMaster: {},
+
+  /* Ссылка на карточку салона на Яндекс Картах (кнопки «Читать все отзывы»). */
+  yandexUrl: 'https://yandex.ru/maps/org/cuerpo/8688668194/',
 
   /* Ссылка на карточку салона в 2ГИС (кнопки «Отзывы в 2ГИС»).
      Замените на прямую ссылку карточки организации. */
   gisUrl: 'https://2gis.ru/togliatti/search/Cuerpo%20%D0%BC%D0%B0%D1%81%D1%81%D0%B0%D0%B6',
-
-  /* Уведомления администратору в Telegram.
-     1) Создайте бота у @BotFather → получите токен.
-     2) Узнайте chat_id администратора (или группы) через @userinfobot.
-     3) Впишите значения ниже. Пока поля пустые — заявка открывается
-        готовым сообщением в Telegram, сайт работает без сервера. */
-  tgBotToken: '',
-  tgChatId:   '',
-
-  /* Запасной канал: заявка уходит готовым текстом в Telegram салона */
-  tgFallback: 'https://t.me/+79278923013',
 
   phone: '+7 (927) 892-30-13',
   phoneRaw: '+79278923013'
@@ -54,7 +58,7 @@ document.addEventListener('click', function(e){
   var href = a.getAttribute('href') || '';
   if (href.indexOf('tel:') === 0) goal('call');
   else if (href.indexOf('yclients.com') > -1) goal('open_yclients');
-  else if (/t\.me|vk\.me|vk\.com|max\.ru/.test(href)) goal('messenger');
+  else if (/t\.me|vk\.me|vk\.com|vk\.ru|max\.ru/.test(href)) goal('messenger');
 }, true);
 
 /* ---------- Долистал до услуг ----------
@@ -92,9 +96,19 @@ if (heroLogo){
 }
 var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+/* Порог появления нижней панели «Записаться»: на главной — когда первый экран
+   уехал вверх примерно на три четверти, на внутренних страницах (там нет hero)
+   — сразу после шапки. Высоту первого экрана считаем каждый раз заново:
+   на мобильных она меняется, когда браузер сворачивает адресную строку. */
+var hero = document.querySelector('.hero');
+function mbarThreshold(){
+  if (!hero) return 140;
+  return Math.max(140, hero.offsetHeight * 0.75);
+}
+
 function onScroll(){
   var s = window.scrollY || document.documentElement.scrollTop;
-  var mbarVisible = s > 140;
+  var mbarVisible = s > mbarThreshold();
   if (mbar) mbar.classList.toggle('is-visible', mbarVisible);
   /* Кнопка «Записаться» в шапке прячется на мобильном ровно тогда, когда
      появляется нижний плавающий бар — иначе на экране одновременно две
@@ -201,40 +215,6 @@ if ('IntersectionObserver' in window){
   });
 })();
 
-/* ---------- Список услуг в форме записи ----------
-   Берётся из assets/services.js — файл собирается из tools/data.py вместе со
-   страницами, поэтому список одинаков на всех страницах и не разъезжается с
-   каталогом. Раньше 24 <option> дублировали каталог руками, и связка держалась
-   на точном совпадении строк: одна опечатка молча роняла выбор в «Помогите выбрать».
-
-   value намеренно не задаём — .value должен равняться тексту опции, именно он
-   уходит в заявку администратору. */
-(function(){
-  var sel = $('#f-service');
-  if (!sel || !window.CUERPO_SERVICES) return;
-  var other = $('#f-service-other');
-  var seen = {};
-  window.CUERPO_SERVICES.forEach(function(grp){
-    var g = document.createElement('optgroup');
-    g.label = grp.group;
-    grp.items.forEach(function(n){
-      if (seen[n]) return;
-      seen[n] = 1;
-      var o = document.createElement('option');
-      o.textContent = n;
-      g.appendChild(o);
-    });
-    if (g.children.length) sel.insertBefore(g, other);
-  });
-})();
-
-/* ---------- Проверка каталога против микроразметки ----------
-   Служебная команда для редактора сайта: открыть консоль браузера и выполнить
-   cuerpoCheckServices(). Покажет услуги без оффера в JSON-LD и наоборот.
-   На посетителей никак не влияет. */
-window.cuerpoCheckServices = function(){
-  var cat = {};
-  (window.CUERPO_SERVICES || []).forEach(function(g){
     g.items.forEach(function(n){ cat[n] = 1; });
   });
   var ld = {};
@@ -436,258 +416,43 @@ function setupRail(wrap, rail, prev, next){
   $('#revPrev').addEventListener('click', function(){ box.scrollBy({left:-step(), behavior:'smooth'}); });
 })();
 
-/* ---------- Модальные окна ---------- */
-var bookModal = $('#bookModal'), privacyModal = $('#privacyModal');
-
-function openModal(m){
-  m.classList.add('is-open');
-  document.body.classList.add('is-locked');
-  var f = m.querySelector('input:not([type=checkbox]), select');
-  if (f) setTimeout(function(){ if (window.innerWidth > 760) f.focus(); }, 260);
+/* ---------- Онлайн-запись ----------
+   Формы с телефоном на сайте нет: заявки принимает YClients, поэтому сайт
+   не собирает персональные данные. Кнопкам «Записаться» адрес проставляется
+   здесь — из CONFIG.booking и карт CONFIG.bookingByService / bookingByMaster.
+   Так ссылка не размазана по разметке: чтобы завести отдельную ссылку на
+   услугу или мастера, достаточно дописать строку в CONFIG. */
+function bookingUrl(el){
+  var svc = el.getAttribute('data-service');
+  var mst = el.getAttribute('data-master');
+  return (svc && CONFIG.bookingByService[svc])
+      || (mst && CONFIG.bookingByMaster[mst])
+      || CONFIG.booking;
 }
-function closeModal(m){
-  m.classList.remove('is-open');
-  if (!$('.modal.is-open')) document.body.classList.remove('is-locked');
-}
-$$('[data-close]').forEach(function(el){
-  el.addEventListener('click', function(){ closeModal(el.closest('.modal')); });
-});
-document.addEventListener('keydown', function(e){
-  if (e.key === 'Escape'){ $$('.modal.is-open').forEach(closeModal); if (document.body.classList.contains('menu-open')) closeMenu(); }
-});
-$$('[data-privacy]').forEach(function(a){
-  a.addEventListener('click', function(e){ e.preventDefault(); openModal(privacyModal); });
+$$('[data-book]').forEach(function(el){
+  el.setAttribute('href', bookingUrl(el));
+  el.setAttribute('target', '_blank');
+  el.setAttribute('rel', 'noopener');
 });
 
-/* Кнопки «Записаться» — с предзаполнением услуги/мастера */
+/* Мобильное меню поверх страницы осталось бы открытым, когда пользователь
+   вернётся из YClients назад — закрываем его сразу. Цель Метрики open_yclients
+   ставит общий обработчик ссылок выше, дублировать не нужно. */
 document.addEventListener('click', function(e){
-  var btn = e.target.closest('[data-book]');
-  if (!btn) return;
-  e.preventDefault();
-  closeMenu();
-
-  $('#bookFormWrap').hidden = false;
-  $('#bookSuccess').hidden = true;
-
-  var svc = btn.dataset.service, master = btn.dataset.master;
-  var sel = $('#f-service');
-  if (svc){
-    var found = Array.prototype.some.call(sel.options, function(o){
-      if (o.text === svc){ sel.value = o.value || o.text; return true; }
-    });
-    if (!found) sel.selectedIndex = 0;
-  }
-  if (master) $('#f-master').value = master;
-
-  goal('open_form');
-  openModal(bookModal);
+  if (e.target.closest && e.target.closest('[data-book]')) closeMenu();
 });
 
-/* ---------- Поле даты и слоты времени ---------- */
-(function(){
-  var d = $('#f-date');
-  var today = new Date();
-  var iso = function(dt){ return dt.toISOString().slice(0,10); };
-  d.min = iso(today);
-  var max = new Date(today.getTime() + 1000*60*60*24*90);
-  d.max = iso(max);
-
-  var t = $('#f-time');
-  t.innerHTML = '<option value="">Любое удобное</option>';
-  for (var h = 9; h <= 20; h++){
-    ['00','30'].forEach(function(m){
-      if (h === 20 && m === '30') return;
-      var v = (h < 10 ? '0' + h : h) + ':' + m;
-      var o = document.createElement('option');
-      o.textContent = v; t.appendChild(o);
-    });
-  }
-})();
-
-/* ---------- Маска телефона ---------- */
-function phoneMask(input){
-  if (!input) return;
-  input.addEventListener('input', function(){
-    var v = input.value.replace(/\D/g, '');
-    if (v[0] === '8') v = '7' + v.slice(1);
-    if (v[0] !== '7') v = '7' + v;
-    v = v.slice(0, 11);
-    var out = '+7';
-    if (v.length > 1) out += ' (' + v.slice(1, 4);
-    if (v.length >= 5) out += ') ' + v.slice(4, 7);
-    if (v.length >= 8) out += '-' + v.slice(7, 9);
-    if (v.length >= 10) out += '-' + v.slice(9, 11);
-    input.value = out;
-  });
-  input.addEventListener('focus', function(){ if (!input.value) input.value = '+7 ('; });
-}
-phoneMask($('#f-phone'));
-phoneMask($('#c-phone'));
-
-/* ---------- Отправка заявки ---------- */
-function buildMessage(d){
-  return '🌿 НОВАЯ ЗАЯВКА С САЙТА CUERPO\n\n'
-    + '👤 Имя: ' + d.name + '\n'
-    + '📞 Телефон: ' + d.phone + '\n'
-    + '💆 Услуга: ' + (d.service || 'помочь выбрать') + '\n'
-    + '🙌 Мастер: ' + d.master + '\n'
-    + '📅 Дата: ' + (d.date || 'не указана') + '\n'
-    + '🕐 Время: ' + (d.time || 'любое удобное') + '\n'
-    + (d.note ? '💬 Комментарий: ' + d.note + '\n' : '')
-    + '\n🌐 Отправлено: ' + new Date().toLocaleString('ru-RU');
-}
-
-/* Отправка заявки администратору в Telegram.
-   Если токен бота не заполнен — cb(false), и заявку предлагаем отправить вручную. */
-function sendToAdmin(text, cb){
-  if (CONFIG.tgBotToken && CONFIG.tgChatId){
-    fetch('https://api.telegram.org/bot' + CONFIG.tgBotToken + '/sendMessage', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({chat_id: CONFIG.tgChatId, text: text})
-    })
-    .then(function(r){ return r.json(); })
-    .then(function(r){ cb(!!r.ok); })
-    .catch(function(){ cb(false); });
-  } else {
-    setTimeout(function(){ cb(false); }, 400);
-  }
-}
-
-/* Журнал заявок в браузере (для выгрузки в Excel: window.cuerpoExportCSV()) */
-function logBooking(d){
-  goal('lead');   /* обе формы проходят здесь — одна точка учёта заявок */
-  try{
-    var list = JSON.parse(localStorage.getItem('cuerpo_bookings') || '[]');
-    d.createdAt = new Date().toISOString();
-    list.push(d);
-    localStorage.setItem('cuerpo_bookings', JSON.stringify(list));
-  }catch(e){}
-}
-window.cuerpoExportCSV = function(){
-  var list = JSON.parse(localStorage.getItem('cuerpo_bookings') || '[]');
-  if (!list.length){ alert('Заявок пока нет'); return; }
-  var head = ['Дата заявки','Имя','Телефон','Услуга','Мастер','Желаемая дата','Время','Комментарий'];
-  var rows = list.map(function(b){
-    return [b.createdAt, b.name, b.phone, b.service, b.master, b.date, b.time, b.note]
-      .map(function(v){ return '"' + String(v == null ? '' : v).replace(/"/g,'""') + '"'; }).join(';');
-  });
-  var csv = '﻿' + head.join(';') + '\n' + rows.join('\n');
-  var a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv;charset=utf-8'}));
-  a.download = 'cuerpo-zayavki.csv';
-  a.click();
-};
-
-var form = $('#bookForm');
-form.addEventListener('submit', function(e){
-  e.preventDefault();
-
-  var nameF = $('#f-name').closest('.field');
-  var phoneF = $('#f-phone').closest('.field');
-  var ok = true;
-
-  var name = $('#f-name').value.trim();
-  nameF.classList.toggle('is-error', !name);
-  if (!name) ok = false;
-
-  var phone = $('#f-phone').value.trim();
-  var digits = phone.replace(/\D/g, '');
-  var phoneOk = digits.length === 11;
-  phoneF.classList.toggle('is-error', !phoneOk);
-  if (!phoneOk) ok = false;
-
-  if (!$('#f-agree').checked){
-    alert('Пожалуйста, подтвердите согласие на обработку персональных данных.');
-    ok = false;
-  }
-  if (!ok) return;
-
-  var data = {
-    name: name,
-    phone: phone,
-    service: $('#f-service').value,
-    master: $('#f-master').value,
-    date: $('#f-date').value ? new Date($('#f-date').value).toLocaleDateString('ru-RU') : '',
-    time: $('#f-time').value,
-    note: $('#f-note').value.trim()
-  };
-  var text = buildMessage(data);
-  logBooking(data);
-
-  var btn = $('#bookSubmit');
-  btn.disabled = true;
-  btn.textContent = 'Отправляем…';
-
-  function done(sentToAdmin){
-    btn.disabled = false;
-    btn.textContent = 'Отправить заявку';
-    $('#bookFormWrap').hidden = true;
-    $('#bookSuccess').hidden = false;
-
-    if (sentToAdmin){
-      $('#successText').textContent = 'Спасибо, ' + data.name + '! Заявка у администратора. Мы перезвоним на ' + data.phone + ', чтобы подтвердить время и мастера.';
-      $('#successTg').href = CONFIG.tgFallback;
-      $('#successTg').textContent = 'Написать в Telegram';
-    } else {
-      $('#successText').textContent = 'Спасибо, ' + data.name + '! Чтобы мы точно не потеряли вашу заявку, отправьте её нам в Telegram — сообщение уже готово, нужно только нажать «Отправить».';
-      $('#successTg').href = CONFIG.tgFallback + '?text=' + encodeURIComponent(text);
-      $('#successTg').textContent = 'Отправить заявку в Telegram';
-    }
-    form.reset();
-  }
-
-  sendToAdmin(text, done);
+/* Esc закрывает мобильное меню */
+document.addEventListener('keydown', function(e){
+  if (e.key === 'Escape' && document.body.classList.contains('menu-open')) closeMenu();
 });
-
-/* ---------- Короткая форма «Перезвоните мне» ---------- */
-(function(){
-  var cf = $('#callForm');
-  if (!cf) return;
-  cf.addEventListener('submit', function(e){
-    e.preventDefault();
-    var name = $('#c-name').value.trim(), phone = $('#c-phone').value.trim();
-    if (phone.replace(/\D/g, '').length !== 11){
-      $('#c-phone').focus();
-      $('#c-phone').style.borderColor = '#C0563F';
-      return;
-    }
-    $('#c-phone').style.borderColor = '';
-
-    var data = {
-      name: name || 'не указано',
-      phone: phone,
-      service: 'Подобрать программу (обратный звонок)',
-      master: '', date: '', time: '', note: ''
-    };
-    var text = buildMessage(data);
-    logBooking(data);
-
-    var btn = $('#callBtn');
-    btn.disabled = true;
-    btn.textContent = 'Отправляем…';
-
-    sendToAdmin(text, function(sent){
-      btn.disabled = false;
-      if (sent){
-        btn.textContent = 'Заявка принята ✓';
-      } else {
-        btn.textContent = 'Открываем Telegram…';
-        window.open(CONFIG.tgFallback + '?text=' + encodeURIComponent(text), '_blank');
-        setTimeout(function(){ btn.textContent = 'Заявка принята ✓'; }, 900);
-      }
-      cf.reset();
-      setTimeout(function(){ btn.textContent = 'Перезвоните мне'; }, 6000);
-    });
-  });
-})();
 
 /* ---------- Плавная прокрутка с учётом шапки ---------- */
 document.addEventListener('click', function(e){
   var a = e.target.closest('a[href^="#"]');
   if (!a) return;
   var id = a.getAttribute('href');
-  if (id === '#' || a.hasAttribute('data-privacy') || a.hasAttribute('data-yandex') || a.hasAttribute('data-2gis')) return;
+  if (id === '#' || a.hasAttribute('data-yandex') || a.hasAttribute('data-2gis')) return;
   var t = document.querySelector(id);
   if (!t) return;
   e.preventDefault();

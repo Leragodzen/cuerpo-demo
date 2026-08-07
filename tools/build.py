@@ -5,7 +5,7 @@
   * uslugi/<направление>/index.html          — страница направления со списком услуг
   * uslugi/<направление>/<услуга>/index.html — страница услуги
   * sertifikaty/index.html                   — подарочные сертификаты
-  * assets/services.js                       — список услуг для формы записи
+  * 404.html                                 — страница «не найдено»
   * sitemap.xml                              — карта сайта
 
 Общая обвязка (шапка, меню, подвал, мобильная панель, модальные окна) не
@@ -22,7 +22,7 @@ import re
 import shutil
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SITE = 'https://leragodzen.github.io/cuerpo-massage-2/'
+SITE = 'https://leragodzen.github.io/cuerpo-demo/'
 
 exec(io.open(os.path.join(ROOT, 'tools', 'data.py'), encoding='utf-8').read())
 
@@ -71,15 +71,14 @@ CHROME = {
     'menu': block('<div class="mobile-menu"'),
     'footer': block('<footer class="footer">', '</footer>'),
     'mbar': block('<div class="mbar"'),
-    'book': block('<div class="modal" id="bookModal"'),
-    'privacy': block('<div class="modal" id="privacyModal"'),
 }
 
 FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com">\n'
          '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n'
          '<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">')
 
-FAVICON = between(INDEX, '<link rel="icon"', '>')
+ICONS = '\n'.join(l for l in LINES
+                  if l.startswith('<link rel="icon"') or l.startswith('<link rel="apple-touch-icon"'))
 METRIKA = between(INDEX, '<!-- ============================================================\n     ЯНДЕКС.МЕТРИКА', '</script>')
 
 
@@ -87,7 +86,10 @@ def esc_attr(s):
     return s.replace('&', '&amp;').replace('"', '&quot;').replace('<', '&lt;')
 
 
-def page(base, url, title, desc, body, extra_ld='', og_image='assets/img/hero.jpg'):
+OG_IMAGE = 'assets/img/og-cover.jpg'
+
+
+def page(base, url, title, desc, body, extra_ld='', og_image=OG_IMAGE):
     return '''<!DOCTYPE html>
 <html lang="ru" class="no-js">
 <head>
@@ -131,21 +133,15 @@ def page(base, url, title, desc, body, extra_ld='', og_image='assets/img/hero.jp
 
 %(mbar)s
 
-%(book)s
-
-%(privacy)s
-
 %(ld)s
-<script src="%(base)sassets/services.js"></script>
 <script src="%(base)sassets/app.js" defer></script>
 </body>
 </html>
 ''' % {
         'title': esc_attr(title), 'desc': esc_attr(desc), 'site': SITE, 'url': url,
-        'og': og_image, 'base': base, 'favicon': FAVICON, 'fonts': FONTS, 'metrika': METRIKA,
+        'og': og_image, 'base': base, 'favicon': rebase(ICONS, base), 'fonts': FONTS, 'metrika': METRIKA,
         'header': rebase(CHROME['header'], base), 'menu': rebase(CHROME['menu'], base),
         'footer': rebase(CHROME['footer'], base), 'mbar': rebase(CHROME['mbar'], base),
-        'book': rebase(CHROME['book'], base), 'privacy': rebase(CHROME['privacy'], base),
         'body': body, 'ld': extra_ld,
     }
 
@@ -231,7 +227,7 @@ def card(s, href, base, main=False):
     if d:
         L.append('    ' + d.replace('class="dur"', 'class="dur dur--card"'))
     L.append('  </div>')
-    L.append('  <button class="btn btn--%s btn--sm" data-book data-service="%s">Записаться</button>'
+    L.append('  <a class="btn btn--%s btn--sm" data-book data-service="%s">Записаться</a>'
              % ('primary' if main else 'ghost', esc_attr(s['name'])))
     L.append('</article>')
     return '\n'.join(L)
@@ -366,7 +362,7 @@ def build_dir_page(d):
     desc = ('%s в массажном салоне Cuerpo, Тольятти, Приморский бульвар 57. %s Запись по телефону '
             '+7 (927) 892-30-13, ежедневно 09:00–21:00.') % (d['title'], plain[:150])
     return write(url + 'index.html',
-                 page(base, url, title, desc, body, ld, og_image=IMG[d['img']][0]))
+                 page(base, url, title, desc, body, ld))
 
 
 # ----------------------------------------------------------------- страница услуги
@@ -388,7 +384,8 @@ def build_svc_page(d, s):
 
     <div class="svcp">
       <figure class="svcp__pic reveal">
-        <img src="%(base)s%(img)s" width="%(w)d" height="%(h)d" alt="%(alt)s">
+        <img src="%(base)s%(img)s" width="%(w)d" height="%(h)d"
+             fetchpriority="high" decoding="async" alt="%(alt)s">
       </figure>
 
       <div class="reveal">
@@ -399,7 +396,7 @@ def build_svc_page(d, s):
 
         <div class="svcp__act">
 %(dur)s
-          <button class="btn btn--primary btn--full" data-book data-service="%(name)s">Записаться</button>
+          <a class="btn btn--primary btn--full" data-book data-service="%(name)s">Записаться</a>
         </div>
 
         <p class="svcp__note">
@@ -476,7 +473,7 @@ def build_svc_page(d, s):
 
     title = '%s в Тольятти — %s | Cuerpo' % (s['name'], s['price_full'])
     desc = '%s Массажный салон Cuerpo, Тольятти, Приморский бульвар 57. Запись: +7 (927) 892-30-13.' % s['lead']
-    return write(url + 'index.html', page(base, url, title, desc[:300], body, ld, og_image=img))
+    return write(url + 'index.html', page(base, url, title, desc[:300], body, ld))
 
 
 # ------------------------------------------------------------------ сертификаты
@@ -490,7 +487,8 @@ def build_gift_page():
 
     <div class="svcp">
       <figure class="svcp__pic reveal">
-        <img src="%(base)sassets/img/gift-certificate.jpg" width="524" height="700"
+        <img src="%(base)sassets/img/gift-certificate.webp" width="524" height="700"
+             fetchpriority="high" decoding="async"
              alt="Подарочный сертификат массажного салона Cuerpo в Тольятти">
       </figure>
 
@@ -506,7 +504,7 @@ def build_gift_page():
         </div>
 
         <div class="svcp__act">
-          <button class="btn btn--primary btn--full" data-book data-service="Подарочный сертификат">Заказать сертификат</button>
+          <a class="btn btn--primary btn--full" data-book data-service="Подарочный сертификат">Заказать сертификат</a>
         </div>
 
         <p class="svcp__note">
@@ -574,25 +572,7 @@ def build_gift_page():
         base, url,
         'Подарочный сертификат на массаж в Тольятти | Cuerpo',
         'Подарочный сертификат массажного салона Cuerpo в Тольятти: на любую услугу от 1 200 ₽, срок действия 6 месяцев, подарочный конверт. Приморский бульвар 57, +7 (927) 892-30-13.',
-        body, ld, og_image='assets/img/gift-certificate.jpg'))
-
-
-# ------------------------------------------------- список услуг для формы записи
-
-def build_services_js():
-    groups = []
-    for d in DIRS:
-        names = []
-        for s in d['services']:
-            if s['name'] not in names:
-                names.append(s['name'])
-        groups.append({'group': d['title'], 'items': names})
-    import json
-    js = ('/* Список услуг для выпадающего меню в форме записи.\n'
-          '   Файл собирается автоматически: python3 tools/build.py\n'
-          '   Править нужно tools/data.py, а не этот файл. */\n'
-          'window.CUERPO_SERVICES = %s;\n' % json.dumps(groups, ensure_ascii=False, indent=1))
-    return write('assets/services.js', js)
+        body, ld))
 
 
 # ------------------------------------------------- блок услуг на главной странице
@@ -617,7 +597,7 @@ TILE = '''      <a class="cat" href="uslugi/%(slug)s/">
 # направление, а отдельное предложение — широкая плашка отделяет его от
 # каталога и не оставляет висеть половину ряда пустой.
 GIFT_TILE = '''      <a class="cat cat--wide" href="sertifikaty/">
-        <img class="cat__img" src="assets/img/gift-certificate.jpg" width="524" height="700" loading="lazy" decoding="async"
+        <img class="cat__img" src="assets/img/gift-certificate.webp" width="524" height="700" loading="lazy" decoding="async"
              alt="Подарочный сертификат массажного салона Cuerpo в Тольятти">
         <span class="cat__body">
           <span class="cat__ttl">Подарочный сертификат</span>
@@ -666,14 +646,140 @@ def build_home_section():
     return HOME_TPL % {'tiles': '\n'.join(tiles), 'rail': rail}
 
 
+SOCIALS = [
+    'https://vk.ru/cuerpo_massage',
+    'https://t.me/+79278923013',
+    'https://max.ru/join/cS6n7juwoTfDZ0bwwvBSRJ9FdDHrQW_8NSufPw8zTFs',
+    'https://yandex.ru/maps/org/cuerpo/8688668194/',
+    'https://n908364.yclients.com/',
+]
+
+
+def build_home_ld():
+    """Микроразметка организации для главной.
+
+    Каталог услуг собирается из tools/data.py, поэтому цены в разметке не
+    расходятся с ценами на страницах. Адрес и часы работы намеренно не
+    выводятся: подтверждённых данных от салона пока нет.
+    """
+    offers = []
+    for _, x in ALL:
+        m = re.search(r'(\d[\d\s\u00a0]*)\s*\u20bd', x['price_full'])
+        price = (',"price":"%s","priceCurrency":"RUB"' % re.sub(r'\s|\u00a0', '', m.group(1))) if m else ''
+        offers.append('      {"@type":"Offer","itemOffered":{"@type":"Service","name":"%s"}%s}'
+                      % (esc_attr(x['name']), price))
+
+    return '''<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": ["LocalBusiness", "HealthAndBeautyBusiness", "DaySpa"],
+  "name": "Cuerpo — мастерская по телу",
+  "alternateName": "Массажный салон Cuerpo Тольятти",
+  "description": "Массажный салон и мастерская по телу Cuerpo в Тольятти: авторский оздоровительный массаж, коррекция фигуры, массаж лица, SPA-программы для двоих, кедровая бочка и сауна с гималайской солью.",
+  "slogan": "Станем скульпторами твоего тела",
+  "url": "%(site)s",
+  "image": "%(site)sassets/img/og-cover.jpg",
+  "telephone": "+7-927-892-30-13",
+  "priceRange": "900–6500 ₽",
+  "currenciesAccepted": "RUB",
+  "areaServed": "Тольятти",
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "5.0",
+    "bestRating": "5",
+    "ratingCount": "180",
+    "reviewCount": "150"
+  },
+  "sameAs": [
+%(social)s
+  ],
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "Услуги массажного салона Cuerpo",
+    "itemListElement": [
+%(offers)s
+    ]
+  }
+}
+</script>''' % {
+        'site': SITE,
+        'social': ',\n'.join('    "%s"' % u for u in SOCIALS),
+        'offers': ',\n'.join(offers),
+    }
+
+
+# ------------------------------------------------------------------ страница 404
+
+def build_404():
+    body = '''<section class="section section--tight subpage">
+  <div class="container">
+    <div class="e404">
+      <p class="eyebrow eyebrow--center">Ошибка 404</p>
+      <h1>Такой страницы нет</h1>
+      <p class="pagehead__lead">Возможно, услугу переименовали или в адресе опечатка.
+      Загляните в каталог — там все программы мастерской с ценами и длительностью,
+      или вернитесь на главную.</p>
+      <div class="e404__act">
+        <a class="btn btn--primary" href="%(site)s">На главную</a>
+        <a class="btn btn--ghost" href="%(site)s#services">Каталог услуг</a>
+      </div>
+      <p class="svcp__note e404__note">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+        Не нашли, что искали — подскажем по телефону
+        <a href="tel:+79278923013">+7 (927) 892-30-13</a>.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="section section--sand">
+  <div class="container">
+    <div class="head head--center reveal">
+      <p class="eyebrow eyebrow--center">Направления</p>
+      <h2 class="h2">Начните отсюда</h2>
+    </div>
+    <div class="cats cats--mini reveal">
+%(cats)s
+    </div>
+  </div>
+</section>
+''' % {'site': SITE, 'cats': '\n'.join(
+        '''      <a class="cat" href="%suslugi/%s/">
+        <img class="cat__img" src="%s%s" width="%d" height="%d" loading="lazy" decoding="async" alt="%s">
+        <span class="cat__body">
+          <span class="cat__ttl">%s</span>
+          <span class="cat__meta">%s</span>
+        </span>
+      </a>''' % (SITE, d['slug'], SITE, IMG[d['img']][0], IMG[d['img']][1], IMG[d['img']][2],
+                 esc_attr(d['tile_alt']), d['tile_ttl'], d['tile_meta'])
+        for d in DIRS)}
+
+    # Сервер отдаёт эту страницу по ЛЮБОМУ несуществующему адресу, в том числе
+    # /uslugi/opechatka/. Относительные пути там указывали бы в никуда, поэтому
+    # обвязка собирается с абсолютной базой.
+    html = page(SITE, '404.html',
+                'Страница не найдена — Cuerpo, массажный салон в Тольятти',
+                'Такой страницы на сайте массажного салона Cuerpo нет. Вернитесь на главную или откройте каталог услуг: массаж, SPA-программы, коррекция фигуры.',
+                body)
+    # Страницу ошибки поисковикам индексировать не нужно
+    html = html.replace('<meta name="robots" content="index, follow">',
+                        '<meta name="robots" content="noindex, follow">')
+    return write('404.html', html)
+
+
 def patch_index():
     path = os.path.join(ROOT, 'index.html')
     html = io.open(path, encoding='utf-8').read()
     a = html.index('<!-- BUILD:services -->') + len('<!-- BUILD:services -->')
     b = html.index('<!-- /BUILD:services -->')
     html = html[:a] + '\n' + build_home_section() + '    ' + html[b:]
+
+    a = html.index('<!-- BUILD:ld -->') + len('<!-- BUILD:ld -->')
+    b = html.index('<!-- /BUILD:ld -->')
+    html = html[:a] + '\n' + build_home_ld() + '\n' + html[b:]
+
     io.open(path, 'w', encoding='utf-8').write(html)
-    return 'index.html (блок услуг)'
+    return 'index.html (блок услуг и микроразметка)'
 
 
 # --------------------------------------------------- ссылки, работающие без сервера
@@ -721,7 +827,7 @@ def main():
     for d, s in ALL:
         made.append(build_svc_page(d, s))
     made.append(build_gift_page())
-    made.append(build_services_js())
+    made.append(build_404())
     made.append(patch_index())
     made.append(fix_links_everywhere())
 

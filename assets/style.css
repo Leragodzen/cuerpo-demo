@@ -681,67 +681,7 @@ body.menu-open .mobile-menu{transform:none; opacity:1; visibility:visible}
 .card-s__tag--d{background:transparent; border:1px solid var(--line); color:var(--ink-3)}
 .card-s .btn{margin:10px 12px 12px}
 
-/* ---------- Шторка услуги ----------
-   Класс .modal обязателен: closeModal снимает блокировку прокрутки только
-   когда не осталось ни одной открытой .modal. Без него закрытие формы
-   записи разблокировало бы страницу под ещё открытой шторкой.
-
-   Селекторы намеренно удвоены (.modal.modal--sheet, .modal__win.sheet__win):
-   правила .modal стоят в этой таблице ниже, и при равной специфичности
-   побеждали бы они — шторка получала бы отступы окна и выравнивание по верху
-   вместо выезда снизу. */
-.modal.modal--sheet{padding:0; overflow:hidden}
-.modal.modal--sheet.is-open{align-items:flex-end}
-.modal__win.sheet__win{
-  width:100%; max-width:none; margin:0; padding:0; overflow:hidden;
-  border-radius:var(--r-l) var(--r-l) 0 0; max-height:92svh;
-  display:flex; flex-direction:column; animation:sheetUp .4s cubic-bezier(.2,.8,.3,1);
-}
-@keyframes sheetUp{from{transform:translateY(100%)}}
-.sheet__grab{
-  width:44px; height:4px; border-radius:99px; background:var(--line);
-  margin:10px auto 2px; flex:none; touch-action:none; cursor:grab;
-}
-.sheet__track{flex:1; min-height:0; display:flex; width:200%; transition:transform .42s cubic-bezier(.2,.8,.3,1)}
-.modal.modal--sheet.is-deep .sheet__track{transform:translateX(-50%)}
-.sheet__pane{
-  width:50%; flex:none; overflow-y:auto; overscroll-behavior:contain;
-  -webkit-overflow-scrolling:touch; padding:6px clamp(18px,4vw,28px) 18px;
-}
-.sheet__pic{margin:0 0 16px; border-radius:var(--r-m); overflow:hidden; aspect-ratio:16/9; background:var(--bg-2)}
-.sheet__pic img{width:100%; height:100%; object-fit:cover}
-.sheet__win h3{font-size:clamp(23px,3.2vw,30px); margin:0 44px 10px 0; padding:0}
-.sheet__meta{display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 14px; margin:0 0 18px}
-.sheet__meta b{font-family:var(--ff-display); font-weight:400; font-size:26px; line-height:1}
-.sheet__meta span{font-size:12.5px; color:var(--ink-3)}
-.sheet__promo{
-  display:inline-block; padding:4px 12px; border-radius:100px; background:#F2E1BE;
-  color:#6A4C1E; font-family:var(--ff-display); font-size:20px; line-height:1.15;
-}
-.sheet__foot{
-  flex:none; padding:12px clamp(18px,4vw,28px) calc(12px + env(safe-area-inset-bottom));
-  border-top:1px solid var(--line-2); background:var(--bg); display:grid; gap:8px;
-}
-.sheet__back{
-  display:inline-flex; align-items:center; gap:8px; margin-bottom:14px;
-  font-size:12.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-2); transition:.3s;
-}
-.sheet__back:hover{color:var(--green)}
-.sheet__back svg{width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:1.6}
-/* .btn задаёт display:inline-flex и перебивает атрибут hidden — гасим явно */
-#sheetMore[hidden]{display:none}
-.modal.modal--sheet.is-deep #sheetMore{display:none}
-#sheetNote{flex:1 0 100%; font-size:11.5px; color:var(--ink-3); line-height:1.45}
-.sheet__pane--long h3{margin-top:4px}
-@media (min-width:760px){
-  .modal.modal--sheet{padding:16px}
-  .modal.modal--sheet.is-open{align-items:center}
-  .modal__win.sheet__win{width:min(660px,100%); border-radius:var(--r-l); max-height:88vh; animation:pop .38s cubic-bezier(.2,.8,.3,1)}
-  .sheet__grab{display:none}
-  .sheet__pane{padding-top:clamp(20px,3vw,28px)}
-}
-
-/* Содержимое шторки: «что входит» и эффекты */
+/* Блоки «что входит в сеанс» и «что вас ждёт» на странице услуги */
 .svc-full h4{
   font-family:var(--ff-text); font-size:11px; letter-spacing:.16em; text-transform:uppercase;
   color:var(--ink-3); font-weight:400; margin:22px 0 10px;
@@ -775,10 +715,12 @@ body.menu-open .mobile-menu{transform:none; opacity:1; visibility:visible}
 .pick__tel{display:inline-flex; align-items:center; gap:10px; margin-top:16px; font-family:var(--ff-display); font-size:clamp(22px,2.8vw,30px); color:#fff; transition:.3s; position:relative}
 .pick__tel:hover{color:var(--mint)}
 .pick__tel svg{width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:1.4}
-.pick__f{position:relative; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.16); border-radius:var(--r-m); padding:20px; display:grid; gap:11px}
-.pick__f input{width:100%; padding:13px 15px; border-radius:var(--r-s); border:1px solid rgba(255,255,255,.22); background:rgba(255,255,255,.94); font-size:15px}
-.pick__f input:focus{outline:none; border-color:#fff; box-shadow:0 0 0 3px rgba(255,255,255,.18)}
-.pick__f small{font-size:11px; color:rgba(255,255,255,.62); line-height:1.5}
+.pick__f{position:relative; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.16); border-radius:var(--r-m); padding:20px; display:grid; gap:10px; align-content:start}
+/* Селекторы удвоены: правило .pick p выше задаёт свой кегль и цвет всем
+   абзацам блока и при равной специфичности перебило бы эти два. */
+.pick .pick__f-ttl{font-family:var(--ff-display); font-size:clamp(19px,2.4vw,23px); color:#fff; margin:0}
+.pick .pick__f-txt{margin:0; font-size:13px; color:rgba(255,255,255,.72); line-height:1.55}
+.pick__f .btn{margin-top:6px}
 @media (min-width:900px){ .pick{grid-template-columns:1.1fr .9fr; align-items:center; gap:40px} }
 
 .services__note{margin-top:20px; font-size:13px; color:var(--ink-3); text-align:center; line-height:1.6}
@@ -1098,61 +1040,6 @@ body.menu-open .mobile-menu{transform:none; opacity:1; visibility:visible}
 @media (min-width:560px){ .map__open{width:auto} }
 @media (min-width:940px){ .contacts__grid{grid-template-columns:1fr 1fr; align-items:center} }
 
-/* ---------- Форма ---------- */
-.form{display:flex; flex-direction:column; gap:16px}
-.form__row{display:grid; gap:16px}
-@media (min-width:560px){ .form__row--2{grid-template-columns:1fr 1fr} }
-.field{display:flex; flex-direction:column; gap:7px}
-.field label{font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3)}
-.field input,.field select,.field textarea{
-  width:100%; padding:14px 16px; border-radius:var(--r-s); border:1px solid var(--line);
-  background:#fff; font-size:15px; font-weight:300; transition:.25s; appearance:none;
-}
-.field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235E564B' stroke-width='1.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 16px center; background-size:12px; padding-right:42px}
-.field textarea{min-height:92px; resize:vertical}
-.field input:focus,.field select:focus,.field textarea:focus{outline:none; border-color:var(--green); box-shadow:0 0 0 3px rgba(95,122,80,.13)}
-.field.is-error input,.field.is-error select{border-color:#C0563F; box-shadow:0 0 0 3px rgba(192,86,63,.12)}
-.field__err{font-size:11.5px; color:#C0563F; display:none; letter-spacing:.02em}
-.field.is-error .field__err{display:block}
-
-.check{display:flex; gap:11px; align-items:flex-start; font-size:12.4px; color:var(--ink-2); line-height:1.6; cursor:pointer}
-.check input{width:18px; height:18px; margin:2px 0 0; flex:none; accent-color:var(--green); cursor:pointer}
-.check a{border-bottom:1px solid var(--line); transition:.3s}
-.check a:hover{color:var(--green); border-color:var(--green)}
-
-/* ============================================================
-   МОДАЛЬНОЕ ОКНО
-   ============================================================ */
-.modal{position:fixed; inset:0; z-index:200; display:none; padding:16px; overflow-y:auto}
-.modal.is-open{display:flex; align-items:flex-start; justify-content:center}
-.modal__bd{position:fixed; inset:0; background:rgba(27,32,26,.62); backdrop-filter:blur(6px); animation:fade .3s}
-.modal__win{
-  position:relative; width:min(560px,100%); background:var(--bg); border-radius:var(--r-l);
-  padding:clamp(24px,4vw,40px); margin:auto; box-shadow:var(--shadow-l); animation:pop .38s cubic-bezier(.2,.8,.3,1);
-}
-@keyframes fade{from{opacity:0}} @keyframes pop{from{opacity:0; transform:translateY(22px) scale(.98)}}
-.modal__close{
-  position:absolute; top:14px; right:14px; width:40px; height:40px; border-radius:50%;
-  display:grid; place-items:center; border:1px solid var(--line); transition:.3s; background:var(--bg)
-}
-.modal__close:hover{border-color:var(--green); color:var(--green); transform:rotate(90deg)}
-.modal__close svg{width:15px; height:15px; stroke:currentColor; stroke-width:1.6; fill:none}
-.modal h3{font-size:clamp(24px,3.4vw,32px); margin-bottom:8px; padding-right:44px}
-.modal__sub{font-size:13.8px; color:var(--ink-2); margin:0 0 24px; line-height:1.6}
-
-.yclients-box{
-  margin-top:22px; padding:18px 20px; border-radius:var(--r-m); background:var(--green-bg);
-  display:flex; flex-wrap:wrap; align-items:center; gap:14px; justify-content:space-between;
-}
-.yclients-box p{margin:0; font-size:13px; color:var(--green-d); line-height:1.55; max-width:30ch}
-
-.success{text-align:center; padding:14px 0 4px}
-.success__ico{width:74px; height:74px; border-radius:50%; background:var(--green-bg); display:grid; place-items:center; margin:0 auto 22px}
-.success__ico svg{width:32px; height:32px; stroke:var(--green); fill:none; stroke-width:1.6}
-.success h3{padding:0; margin-bottom:12px}
-.success p{color:var(--ink-2); font-size:14.5px; line-height:1.7; margin:0 auto 24px; max-width:38ch}
-.success__actions{display:flex; flex-direction:column; gap:10px}
-
 /* ============================================================
    ПОДВАЛ + МОБИЛЬНАЯ ПАНЕЛЬ
    ============================================================ */
@@ -1166,9 +1053,28 @@ body.menu-open .mobile-menu{transform:none; opacity:1; visibility:visible}
 .footer__links{display:flex; flex-wrap:wrap; gap:8px 20px; padding:0 0 20px; font-size:12.5px}
 .footer__links a{color:#8E8778; transition:.3s}
 .footer__links a:hover{color:var(--green-l)}
+.footer__soc{display:flex; gap:9px; margin-top:14px}
+.footer__soc a{
+  width:38px; height:38px; padding:0; display:grid; place-items:center; flex:none;
+  border:1px solid rgba(255,255,255,.14); border-radius:50%; color:#9E958A;
+}
+.footer__soc a:hover{border-color:var(--green-l); color:var(--green-l)}
+.footer__soc svg{width:17px; height:17px; fill:currentColor}
+/* У пина Яндекс Карт контур, а не заливка — иначе он превращается в кляксу */
+.footer__soc a[aria-label*="Яндекс"] svg{fill:none; stroke:currentColor; stroke-width:1.6}
 .footer__bottom{border-top:1px solid rgba(255,255,255,.08); padding:18px 0 calc(18px + env(safe-area-inset-bottom)); display:flex; flex-wrap:wrap; gap:10px 24px; justify-content:space-between; font-size:12px; color:#7C746A}
 .footer__bottom a:hover{color:var(--green-l)}
+.footer__legal{font-size:11.5px; color:#6B655C}
 @media (min-width:800px){ .footer__grid{grid-template-columns:1.6fr 1fr; gap:40px} }
+
+/* ============================================================
+   СТРАНИЦА 404
+   ============================================================ */
+.e404{max-width:62ch; margin:clamp(20px,5vw,60px) auto clamp(30px,6vw,70px); text-align:center}
+.e404 h1{margin:6px 0 14px}
+.e404 .pagehead__lead{margin-inline:auto}
+.e404__act{display:flex; flex-wrap:wrap; justify-content:center; gap:12px; margin-top:28px}
+.e404__note{justify-content:center; margin-top:26px}
 
 .mbar{
   position:fixed; left:0; right:0; bottom:0; z-index:90; display:flex; gap:9px; padding:10px 14px calc(10px + env(safe-area-inset-bottom));
@@ -1182,10 +1088,19 @@ body.menu-open .mobile-menu{transform:none; opacity:1; visibility:visible}
 @media (min-width:1000px){ .mbar{display:none} }
 @media (max-width:999px){ body{padding-bottom:0} .footer__bottom{padding-bottom:calc(88px + env(safe-area-inset-bottom))} }
 
-/* ---------- Анимация появления ---------- */
+/* ---------- Анимация появления ----------
+   Блоки проявляются, когда доходят до экрана: класс is-in вешает app.js.
+   Класс no-js на <html> снимает тот же скрипт первой строкой в <head>, так что
+   правило ниже срабатывает только если скриптов нет вовсе — тогда блоки просто
+   видны сразу. Без него страница без JS осталась бы пустой.
+   При включённом «уменьшении движения» в системе — тоже без анимации. */
 .reveal{opacity:0; transform:translateY(26px); transition:opacity .8s cubic-bezier(.2,.7,.3,1), transform .8s cubic-bezier(.2,.7,.3,1)}
 .reveal.is-in{opacity:1; transform:none}
 .reveal.d1{transition-delay:.08s} .reveal.d2{transition-delay:.16s} .reveal.d3{transition-delay:.24s}
+.no-js .reveal{opacity:1; transform:none; transition:none}
+@media (prefers-reduced-motion:reduce){
+  .reveal{opacity:1; transform:none; transition:none}
+}
 
 .sr-only{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0}
 
