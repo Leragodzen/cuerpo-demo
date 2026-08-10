@@ -81,6 +81,11 @@ ICONS = '\n'.join(l for l in LINES
                   if l.startswith('<link rel="icon"') or l.startswith('<link rel="apple-touch-icon"'))
 METRIKA = between(INDEX, '<!-- ============================================================\n     ЯНДЕКС.МЕТРИКА', '</script>')
 
+# Разрешение на индексацию берём с главной, чтобы значение жило в одном месте:
+# поправили <meta name="robots"> в index.html, пересобрали — и оно разошлось по
+# всем страницам. Пока это демо, там стоит noindex.
+ROBOTS = between(INDEX, '<meta name="robots"', '>')
+
 
 def esc_attr(s):
     return s.replace('&', '&amp;').replace('"', '&quot;').replace('<', '&lt;')
@@ -100,7 +105,7 @@ def page(base, url, title, desc, body, extra_ld='', og_image=OG_IMAGE):
 
 <title>%(title)s</title>
 <meta name="description" content="%(desc)s">
-<meta name="robots" content="index, follow">
+%(robots)s
 <meta name="format-detection" content="telephone=no">
 <link rel="canonical" href="%(site)s%(url)s">
 
@@ -139,7 +144,8 @@ def page(base, url, title, desc, body, extra_ld='', og_image=OG_IMAGE):
 </html>
 ''' % {
         'title': esc_attr(title), 'desc': esc_attr(desc), 'site': SITE, 'url': url,
-        'og': og_image, 'base': base, 'favicon': rebase(ICONS, base), 'fonts': FONTS, 'metrika': METRIKA,
+        'robots': ROBOTS, 'og': og_image, 'base': base,
+        'favicon': rebase(ICONS, base), 'fonts': FONTS, 'metrika': METRIKA,
         'header': rebase(CHROME['header'], base), 'menu': rebase(CHROME['menu'], base),
         'footer': rebase(CHROME['footer'], base), 'mbar': rebase(CHROME['mbar'], base),
         'body': body, 'ld': extra_ld,
@@ -761,9 +767,11 @@ def build_404():
                 'Страница не найдена — Cuerpo, массажный салон в Тольятти',
                 'Такой страницы на сайте массажного салона Cuerpo нет. Вернитесь на главную или откройте каталог услуг: массаж, SPA-программы, коррекция фигуры.',
                 body)
-    # Страницу ошибки поисковикам индексировать не нужно
-    html = html.replace('<meta name="robots" content="index, follow">',
-                        '<meta name="robots" content="noindex, follow">')
+    # Страницу ошибки поисковикам индексировать не нужно — независимо от того,
+    # что стоит в robots на главной. Заменяем тег целиком, а не конкретную
+    # строку: иначе, открыв индексацию сайта, эту страницу тоже открыли бы.
+    html = re.sub(r'<meta name="robots"[^>]*>',
+                  '<meta name="robots" content="noindex, follow">', html, count=1)
     return write('404.html', html)
 
 
