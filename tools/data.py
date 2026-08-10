@@ -36,13 +36,13 @@ IMG = {
     'p-salt':   ('assets/img/svc-salt-scrub.webp', 1023, 1537),
     'p-barrel': ('assets/img/svc-barrel.webp', 1023, 1537),
     # Съёмка процедур — партия 2, для ленты «Популярные услуги» на главной
-    'u-back':    ('assets/img/u-back.webp', 784, 1168),
+    'u-back':    ('assets/img/u-back.webp', 784, 732),
     'u-oil':     ('assets/img/u-oil.webp', 1205, 1509),
     'u-duo2':    ('assets/img/u-duo2.webp', 800, 1200),
     'u-relax':   ('assets/img/u-relax.webp', 474, 709),
     'u-facemas': ('assets/img/u-facemas.webp', 720, 900),
     'u-preg':    ('assets/img/u-preg.webp', 736, 552),
-    'u-waist':   ('assets/img/u-waist.webp', 1200, 1200),
+    'u-waist':   ('assets/img/u-waist.webp', 1448, 1086),
     'u-neck':    ('assets/img/u-neck.webp', 736, 736),
     'u-hands':   ('assets/img/u-hands.webp', 1199, 1799),
 }
