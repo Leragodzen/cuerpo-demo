@@ -27,9 +27,8 @@ var CONFIG = {
   /* Ссылка на карточку салона на Яндекс Картах (кнопки «Читать все отзывы»). */
   yandexUrl: 'https://yandex.ru/maps/org/cuerpo/8688668194/',
 
-  /* Ссылка на карточку салона в 2ГИС (кнопки «Отзывы в 2ГИС»).
-     Замените на прямую ссылку карточки организации. */
-  gisUrl: 'https://2gis.ru/togliatti/search/Cuerpo%20%D0%BC%D0%B0%D1%81%D1%81%D0%B0%D0%B6',
+  /* Ссылка на карточку салона в 2ГИС (кнопки «Отзывы в 2ГИС»). */
+  gisUrl: 'https://2gis.ru/togliatti/firm/3096753025849899',
 
   phone: '+7 (927) 892-30-13',
   phoneRaw: '+79278923013'
@@ -431,6 +430,57 @@ function setupRail(wrap, rail, prev, next){
   function step(){ var c = box.querySelector('.rev'); return c ? c.offsetWidth + 16 : 320; }
   $('#revNext').addEventListener('click', function(){ box.scrollBy({left: step(), behavior:'smooth'}); });
   $('#revPrev').addEventListener('click', function(){ box.scrollBy({left:-step(), behavior:'smooth'}); });
+})();
+
+/* ---------- Всплывающая плашка с предложением ----------
+   Показывается один раз в сутки и только после того, как человек ушёл ниже
+   первого экрана: до этого он ещё не понял, куда попал, и закроет её не читая.
+   Отказ помним в localStorage — навязываться на каждой странице нельзя.
+   Плашка есть не на всех страницах, поэтому сначала проверяем, что она в вёрстке. */
+(function(){
+  var pop = $('#pop');
+  if (!pop) return;
+
+  var KEY = 'cuerpo_pop_closed';
+  var DAY = 24 * 60 * 60 * 1000;
+
+  /* localStorage может быть недоступен — приватный режим, отключённые куки.
+     Тогда просто показываем плашку как обычно, но молча: падать нельзя. */
+  function closedRecently(){
+    try {
+      var t = window.localStorage.getItem(KEY);
+      return t && (Date.now() - parseInt(t, 10)) < DAY;
+    } catch (e) { return false; }
+  }
+  function remember(){
+    try { window.localStorage.setItem(KEY, String(Date.now())); } catch (e) {}
+  }
+
+  if (closedRecently()) return;
+
+  var shown = false;
+  function maybeShow(){
+    if (shown || window.scrollY < window.innerHeight * 0.8) return;
+    shown = true;
+    window.removeEventListener('scroll', maybeShow);
+    pop.classList.add('is-in');
+  }
+
+  function hide(){
+    pop.classList.remove('is-in');
+    remember();
+  }
+
+  $('[data-pop-close]', pop).addEventListener('click', hide);
+  /* Ушёл по ссылке — значит плашка сработала, второй раз показывать незачем */
+  var link = $('a', pop);
+  if (link) link.addEventListener('click', remember);
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && pop.classList.contains('is-in')) hide();
+  });
+
+  window.addEventListener('scroll', maybeShow, { passive: true });
+  maybeShow();
 })();
 
 /* ---------- Плавная прокрутка с учётом шапки ---------- */

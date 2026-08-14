@@ -207,15 +207,41 @@ def price_rows(s):
     return '\n'.join(out)
 
 
+CAMERA = ('<svg viewBox="0 0 24 24" aria-hidden="true">'
+          '<path d="M3 8.5h3.2l1.4-2.2h8.8l1.4 2.2H21v10H3z"/>'
+          '<circle cx="12" cy="13.2" r="3.6"/></svg>')
+
+
+def shot_stub(s, cls):
+    """Заглушка вместо фотографии — с описанием нужного кадра.
+
+    Половина снимков в каталоге была подобрана в интернете и к салону
+    отношения не имеет. Ставить их рядом с реальными — обманывать гостя,
+    а убрать вовсе — сломать вёрстку. Поэтому здесь стоит осознанная
+    заглушка: она держит сетку и заодно служит техзаданием на съёмку.
+
+    Как убрать: положите снимок в assets/img, пропишите его в IMG,
+    укажите услуге 'img' и удалите у неё поле 'shot'.
+    """
+    return ('    <span class="%s shot">\n'
+            '      <span class="shot__ic">%s</span>\n'
+            '      <span class="shot__lab">Нужна фотография</span>\n'
+            '      <span class="shot__txt">%s</span>\n'
+            '    </span>' % (cls, CAMERA, s['shot']))
+
+
 def card(s, href, base, main=False):
     """Карточка услуги для страницы направления и для лент."""
-    img, w, h = IMG[s['img']]
     L = ['<article class="card-s reveal">']
     L.append('  <a class="card-s__open" href="%s">' % href)
-    L.append('    <span class="card-s__pic">')
-    L.append('      <img src="%s%s" width="%d" height="%d" loading="lazy" decoding="async" alt="%s">' % (base, img, w, h, esc_attr(s['alt'])))
-    L.append('      <span class="card-s__more">%s</span>' % ARROW)
-    L.append('    </span>')
+    if s.get('shot'):
+        L.append(shot_stub(s, 'card-s__pic'))
+    else:
+        img, w, h = IMG[s['img']]
+        L.append('    <span class="card-s__pic">')
+        L.append('      <img src="%s%s" width="%d" height="%d" loading="lazy" decoding="async" alt="%s">' % (base, img, w, h, esc_attr(s['alt'])))
+        L.append('      <span class="card-s__more">%s</span>' % ARROW)
+        L.append('    </span>')
     L.append('  </a>')
     L.append('  <div class="card-s__in">')
     if s.get('promo'):
@@ -237,48 +263,6 @@ def card(s, href, base, main=False):
              % ('primary' if main else 'ghost', esc_attr(s['name'])))
     L.append('</article>')
     return '\n'.join(L)
-
-
-def price_list(d, href_for):
-    """Прайс-список под карточками направления.
-
-    Карточка с фотографией — дорогая: она занимает экран и требует снимка,
-    которого у нас на каждую услугу нет. Поэтому фотокарточки получают только
-    услуги с 'feat', а всё остальное живёт строками «название · длительность ·
-    цена». Человек видит весь прайс направления, не пролистывая десять плиток,
-    а подробная страница есть у каждой строки.
-    """
-    # Список нужен, только если он что-то добавляет к карточкам. Там, где все
-    # услуги и так показаны фотокарточками, он был бы просто их повтором.
-    if all(s.get('feat') for s in d['services']):
-        return ''
-    rows = []
-    for s in d['services']:
-        # У услуг с переключателем цены длительностей несколько — в строке
-        # показываем диапазон, точные варианты человек увидит на странице.
-        if s.get('durations'):
-            a, b = s['durations'][0]['label'], s['durations'][-1]['label']
-            pa, pb = a.rsplit(' ', 1), b.rsplit(' ', 1)
-            # «30 минут» и «45 минут» → «30–45 минут», а не «30 минут — 45 минут»
-            dur = '%s–%s %s' % (pa[0], pb[0], pa[1]) if len(pa) == 2 and pa[1] == pb[1] else '%s — %s' % (a, b)
-        else:
-            dur = s.get('dur', '')
-        rows.append(
-            '      <a class="plist__r" href="%s">\n'
-            '        <span class="plist__n">%s</span>\n'
-            '        <span class="plist__d">%s</span>\n'
-            '        <span class="plist__p">%s</span>\n'
-            '        <span class="plist__go" aria-hidden="true">%s</span>\n'
-            '      </a>' % (href_for(s), s['title'], dur, s['price_full'], ARROW))
-    return '''
-    <div class="plist reveal">
-      <div class="plist__head">
-        <h2 class="h3">Все услуги и цены направления</h2>
-        <span class="plist__hint">Нажмите на строку — откроется описание и запись</span>
-      </div>
-%s
-    </div>
-''' % '\n'.join(rows)
 
 
 def eff_block(s):
@@ -353,9 +337,11 @@ def build_dir_page(d):
         ds, ss = HOME[s['name']]
         return '%s/' % ss if ds == d['slug'] else '../%s/%s/' % (ds, ss)
 
-    feat = [s for s in d['services'] if s.get('feat')]
-    cards = '\n'.join(card(s, href_for(s), base, main=s.get('main', False)) for s in feat)
-    plist = price_list(d, href_for)
+    # Все услуги направления — карточками с фотографией, коротким описанием
+    # и кнопкой записи. Прайс-списком строками они были до 14 августа: список
+    # компактнее, но заказчик забраковал — «не читается».
+    cards = '\n'.join(card(s, href_for(s), base, main=s.get('main', False))
+                      for s in d['services'])
 
     others = '\n'.join(
         '''      <a class="cat" href="../%s/">
@@ -381,7 +367,6 @@ def build_dir_page(d):
     <div class="cards cards--%(ncards)d">
 %(cards)s
     </div>
-%(plist)s
   </div>
 </section>
 
@@ -399,11 +384,10 @@ def build_dir_page(d):
 ''' % {
         'crumbs': crumbs([('Главная', base), ('Услуги', base + '#services'), (d['title'], None)]),
         'sub': d['sub'], 'title': d['title'], 'intro': d['intro'],
-        'cards': cards, 'plist': plist, 'others': others,
-        # Сетка сверстана на 4 колонки. Направлений с четырьмя фотокарточками
-        # нет, поэтому число карточек уезжает в класс: иначе ряд из двух
-        # карточек оставляет полэкрана пустым.
-        'ncards': min(len(feat), 4),
+        'cards': cards, 'others': others,
+        # Сетка сверстана на 4 колонки. Где услуг меньше, число уезжает
+        # в класс: иначе ряд из двух карточек оставляет полэкрана пустым.
+        'ncards': min(len(d['services']), 4),
     }
 
     ld = '''<script type="application/ld+json">
@@ -437,10 +421,7 @@ def build_svc_page(d, s):
 %(crumbs)s
 
     <div class="svcp">
-      <figure class="svcp__pic reveal">
-        <img src="%(base)s%(img)s" width="%(w)d" height="%(h)d"
-             fetchpriority="high" decoding="async" alt="%(alt)s">
-      </figure>
+%(pic)s
 
       <div class="reveal">
         <h1>%(title)s</h1>
@@ -492,7 +473,14 @@ def build_svc_page(d, s):
 </section>
 ''' % {
         'crumbs': crumbs([('Главная', base), (d['title'], '../'), (s['name'], None)]),
-        'base': base, 'img': img, 'w': w, 'h': h, 'alt': esc_attr(s['alt']),
+        'base': base,
+        'pic': ('      <figure class="svcp__pic reveal">\n%s\n      </figure>'
+                % shot_stub(s, 'svcp__stub').replace('    <span', '        <span')
+                ) if s.get('shot') else (
+               '      <figure class="svcp__pic reveal">\n'
+               '        <img src="%s%s" width="%d" height="%d"\n'
+               '             fetchpriority="high" decoding="async" alt="%s">\n'
+               '      </figure>' % (base, img, w, h, esc_attr(s['alt']))),
         'title': s['name'], 'lead': s['lead'],
         'tags': ('        <div class="svcp__tags">%s</div>'
                  % ''.join('<span class="card-s__tag">%s</span>' % t for t in s.get('tags', []))) if s.get('tags') else '',
@@ -532,9 +520,43 @@ def build_svc_page(d, s):
 
 # ------------------------------------------------------------------ сертификаты
 
+# Номиналы сертификата. Подобраны под реальный прайс: 1 500 ₽ покрывает
+# массаж головы или бочку, 3 000 ₽ — авторский массаж, 5 000 ₽ — SPA-программу
+# для одного, 9 000 ₽ — программу для двоих.
+# ЗАМЕНИТЬ, когда салон утвердит свои номиналы.
+GIFT_SUMS = [
+    ('1 500 ₽', 'массаж головы, бочка или сауна'),
+    ('3 000 ₽', 'авторский массаж или массаж лица'),
+    ('5 000 ₽', 'SPA-программа для одного'),
+    ('9 000 ₽', 'SPA-программа для двоих'),
+]
+
+
 def build_gift_page():
     base = '../'
     url = 'sertifikaty/'
+
+    sums = '\n'.join(
+        '''        <span class="denom">
+          <span class="denom__v">%s</span>
+          <span class="denom__t">%s</span>
+        </span>''' % (v, t) for v, t in GIFT_SUMS)
+
+    # Полный прайс сертификата: сгруппирован по направлениям, строкой на услугу.
+    # Здесь это меню, а не витрина — человек уже решил дарить и выбирает номинал,
+    # поэтому карточки с фотографиями только растянули бы страницу на три экрана.
+    menu = []
+    for d in DIRS:
+        menu.append('        <div class="gmenu__g">')
+        menu.append('          <h3 class="gmenu__h">%s</h3>' % d['title'])
+        for s in d['services']:
+            menu.append(
+                '          <a class="gmenu__r" href="%suslugi/%s/%s/">'
+                '<span>%s</span><b>%s</b></a>'
+                % (base, d['slug'], s['slug'], s['title'], s['price_full']))
+        menu.append('        </div>')
+    menu = '\n'.join(menu)
+
     body = '''<section class="section section--tight subpage">
   <div class="container">
 %(crumbs)s
@@ -549,61 +571,123 @@ def build_gift_page():
       <div class="reveal">
         <h1>Подарочный сертификат</h1>
         <p class="pagehead__lead">Самый простой способ подарить близкому человеку время на себя.
-        Сертификат оформляется на конкретную программу или на сумму — получатель сам выберет,
+        Сертификат оформляется на любую услугу мастерской или на сумму — получатель сам выберет,
         что ему нужнее, и придёт тогда, когда будет удобно.</p>
 
         <div class="prices">
-          <div class="prices__r"><b>от 1 200 ₽</b><span>на любую услугу из каталога</span></div>
+          <div class="prices__r"><b>от 900 ₽</b><span>на любую услугу из каталога</span></div>
           <div class="prices__r prices__r--base"><b>6 месяцев</b><span>срок действия</span></div>
         </div>
 
         <div class="svcp__act">
-          <a class="btn btn--primary btn--full" data-book data-service="Подарочный сертификат">Заказать сертификат</a>
+          <a class="btn btn--primary btn--full" href="tel:+79278923013">Заказать по телефону</a>
         </div>
 
         <p class="svcp__note">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
           Оформляем в салоне или по телефону <a href="tel:+79278923013">+7 (927) 892-30-13</a>.
-          Выдаём в подарочном конверте — забрать можно в день обращения.
+          Выдаём в фирменном конверте — забрать можно в день обращения.
         </p>
       </div>
     </div>
   </div>
 </section>
 
+<!-- ============================================================
+     НОМИНАЛЫ
+     Суммы — наше предположение под реальный прайс. ЗАМЕНИТЬ, когда салон
+     утвердит свои. Задаются в GIFT_SUMS в tools/build.py.
+     ============================================================ -->
 <section class="section section--sand">
   <div class="container">
-    <div class="ba__grid" style="display:grid; gap:clamp(26px,4vw,52px)">
-      <div class="reveal">
-        <h2 class="h3">Что вас ждёт</h2>
-        <ul class="svc-full__eff">
-          <li><span class="ic"><svg viewBox="0 0 24 24">%(heart)s</svg></span>Подарок, который точно пригодится</li>
-          <li><span class="ic"><svg viewBox="0 0 24 24">%(star)s</svg></span>Получатель сам выбирает программу и время</li>
-          <li><span class="ic"><svg viewBox="0 0 24 24">%(clock)s</svg></span>Полгода на то, чтобы воспользоваться</li>
-        </ul>
-      </div>
-      <div class="reveal">
-        <h2 class="h3">Как оформить</h2>
-        <ul class="svc-full__inc">
-          <li>Позвоните или напишите — подскажем, что выбрать под повод и бюджет</li>
-          <li>Назовите номинал или конкретную программу</li>
-          <li>Заберите сертификат в салоне на Приморском бульваре, 57</li>
-          <li>Вручите — активировать заранее не нужно</li>
-        </ul>
-      </div>
+    <div class="head reveal">
+      <p class="eyebrow">Шаг 1</p>
+      <h2 class="h2">Выберите номинал</h2>
+      <p class="lead">Если не знаете, что именно понравится, — дарите сумму.
+      Получатель сам выберет программу, а разницу при желании доплатит в салоне.</p>
+    </div>
+
+    <div class="denoms reveal">
+%(sums)s
+      <span class="denom denom--own">
+        <span class="denom__v">Своя сумма</span>
+        <span class="denom__t">любая, от 900 ₽ — скажите администратору</span>
+      </span>
     </div>
   </div>
 </section>
 
-<section class="section section--tight">
+<!-- ============================================================
+     СЕРТИФИКАТ НА КОНКРЕТНУЮ УСЛУГУ
+     Список собирается из tools/data.py — отдельно вести его не нужно.
+     ============================================================ -->
+<section class="section">
   <div class="container">
     <div class="head reveal">
-      <p class="eyebrow">Что подарить</p>
-      <h2 class="h2">Программы, которые чаще всего<br>берут в подарок</h2>
+      <p class="eyebrow">Шаг 2, если хотите точнее</p>
+      <h2 class="h2">Или подарите конкретную программу</h2>
+      <p class="lead">Сертификат можно оформить на любую услугу мастерской — вот весь список
+      с ценами. Нажмите на строку, чтобы прочитать, что входит в программу.</p>
     </div>
-    <div class="rail-s reveal">
-      <div class="rail-s__track">
-%(rail)s
+
+    <div class="gmenu reveal">
+%(menu)s
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     ПРАВИЛА
+     Формулировки даны салоном. Электронный сертификат сейчас оформляется
+     администратором вручную — автоматической оплаты на сайте нет.
+     ============================================================ -->
+<section class="section section--sand">
+  <div class="container">
+    <div class="head reveal">
+      <p class="eyebrow">Как получить</p>
+      <h2 class="h2">Бумажный и электронный</h2>
+    </div>
+
+    <div class="grules">
+      <article class="grules__c reveal">
+        <span class="grules__ic"><svg viewBox="0 0 24 24">%(heart)s</svg></span>
+        <h3>Бумажный, в конверте</h3>
+        <p>После оплаты сертификат можно забрать в салоне в рабочее время —
+        ежедневно с 09:00 до 21:00, Приморский бульвар, 57.</p>
+      </article>
+
+      <article class="grules__c reveal d1">
+        <span class="grules__ic"><svg viewBox="0 0 24 24">%(star)s</svg></span>
+        <h3>Электронный, на почту</h3>
+        <p>После оплаты электронного сертификата отправим его на вашу почту
+        в течение 60 минут. Если вы оформили сертификат после 22:00,
+        отправим на почту в 09:00 следующего дня.</p>
+      </article>
+
+      <article class="grules__c reveal d2">
+        <span class="grules__ic"><svg viewBox="0 0 24 24">%(clock)s</svg></span>
+        <h3>Срок действия</h3>
+        <p>Полгода с момента покупки. Активировать заранее не нужно —
+        получатель просто называет номер сертификата при записи.</p>
+      </article>
+    </div>
+
+    <div class="pick reveal" style="margin-top:clamp(28px,4vw,44px)">
+      <div>
+        <h3>Оформить сертификат</h3>
+        <p>Позвоните или напишите — администратор подскажет, что выбрать под повод
+        и бюджет, оформит сертификат и подготовит конверт. Электронный пришлём
+        на почту письмом.</p>
+        <a class="pick__tel" href="tel:+79278923013">
+          <svg viewBox="0 0 24 24"><path d="M21 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 1.1 4.2 2 2 0 0 1 3.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.4 2.1L7.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.4 1.8.6 2.8.8a2 2 0 0 1 1.7 2z"/></svg>
+          +7 (927) 892-30-13
+        </a>
+      </div>
+      <div class="pick__f">
+        <p class="pick__f-ttl">Написать в мессенджер</p>
+        <p class="pick__f-txt">Telegram, MAX или VK — по тому же номеру.
+        Ответим в рабочее время, ежедневно с 09:00 до 21:00.</p>
+        <a class="btn btn--light btn--full" href="https://t.me/+79278923013" target="_blank" rel="noopener">Написать в Telegram</a>
       </div>
     </div>
   </div>
@@ -611,11 +695,7 @@ def build_gift_page():
 ''' % {
         'crumbs': crumbs([('Главная', base), ('Подарочный сертификат', None)]),
         'base': base, 'heart': IC['heart'], 'star': IC['star'], 'clock': IC['clock'],
-        'rail': '\n'.join(card(x, svc_url(x['name'], base), base)
-                          for _, x in ALL if x['name'] in (
-                              'SPA-программа «Десерт для души»', 'SPA-программа для двоих',
-                              'SPA-программа «Relax»', 'SPA-программа «Удовольствие»',
-                              'Кедровая бочка', 'Массаж горячими камнями')),
+        'sums': sums, 'menu': menu,
     }
     ld = '''<script type="application/ld+json">
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
@@ -625,7 +705,7 @@ def build_gift_page():
     return write(url + 'index.html', page(
         base, url,
         'Подарочный сертификат на массаж в Тольятти | Cuerpo',
-        'Подарочный сертификат массажного салона Cuerpo в Тольятти: на любую услугу от 1 200 ₽, срок действия 6 месяцев, подарочный конверт. Приморский бульвар 57, +7 (927) 892-30-13.',
+        'Подарочный сертификат массажного салона Cuerpo в Тольятти: на любую услугу от 900 ₽ или на свою сумму, срок действия 6 месяцев, бумажный в конверте и электронный на почту. Приморский бульвар 57, +7 (927) 892-30-13.',
         body, ld))
 
 
@@ -656,15 +736,23 @@ WIDE_TILE = TILE.replace('class="cat"', 'class="cat cat--wide"')
 # Сертификат стоит последним и занимает всю ширину сетки: это не седьмое
 # направление, а отдельное предложение — широкая плашка отделяет его от
 # каталога и не оставляет висеть половину ряда пустой.
-GIFT_TILE = '''      <a class="cat cat--wide" href="sertifikaty/">
-        <img class="cat__img" src="assets/img/gift-certificate.webp" width="524" height="700" loading="lazy" decoding="async"
-             alt="Подарочный сертификат массажного салона Cuerpo в Тольятти">
-        <span class="cat__body">
-          <span class="cat__ttl">Подарочный сертификат</span>
-          <span class="cat__sub">на любую услугу или сумму · в подарочном конверте</span>
-          <span class="cat__meta">от 1 200 ₽ · оформить онлайн или в салоне</span>
+# Сертификат не плитка каталога, а отдельное предложение, поэтому у него своя
+# вёрстка: сплошная тёмно-зелёная заливка вместо фотографии, крупная типографика
+# и медленный блик по поверхности. Фотография тут проигрывала — сертификат
+# теряется среди снимков массажа, а дарят его часто те, кто сам на массаж
+# не собирается и каталог не листает.
+GIFT_TILE = '''      <a class="giftban" href="sertifikaty/">
+        <span class="giftban__sheen" aria-hidden="true"></span>
+        <span class="giftban__in">
+          <span class="giftban__eyebrow">Подарок, который ждут</span>
+          <span class="giftban__ttl">Подарочный<br>сертификат</span>
+          <span class="giftban__sub">На любую услугу мастерской или на свою сумму.<br>В фирменном конверте — или письмом на почту.</span>
+          <span class="giftban__row">
+            <span class="giftban__btn">Выбрать сертификат %s</span>
+            <span class="giftban__meta">от 900 ₽ · действует 6 месяцев</span>
+          </span>
         </span>
-      </a>'''
+      </a>''' % ARROW
 
 HOME_TPL = '''    <div class="head head--center reveal">
       <p class="eyebrow eyebrow--center">Услуги и цены</p>

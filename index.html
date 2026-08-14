@@ -264,13 +264,16 @@ if (window.CUERPO_METRIKA){
           <span class="cat__meta">со 2 триместра · 3 000 ₽</span>
         </span>
       </a>
-      <a class="cat cat--wide" href="sertifikaty/index.html">
-        <img class="cat__img" src="assets/img/gift-certificate.webp" width="524" height="700" loading="lazy" decoding="async"
-             alt="Подарочный сертификат массажного салона Cuerpo в Тольятти">
-        <span class="cat__body">
-          <span class="cat__ttl">Подарочный сертификат</span>
-          <span class="cat__sub">на любую услугу или сумму · в подарочном конверте</span>
-          <span class="cat__meta">от 1 200 ₽ · оформить онлайн или в салоне</span>
+      <a class="giftban" href="sertifikaty/index.html">
+        <span class="giftban__sheen" aria-hidden="true"></span>
+        <span class="giftban__in">
+          <span class="giftban__eyebrow">Подарок, который ждут</span>
+          <span class="giftban__ttl">Подарочный<br>сертификат</span>
+          <span class="giftban__sub">На любую услугу мастерской или на свою сумму.<br>В фирменном конверте — или письмом на почту.</span>
+          <span class="giftban__row">
+            <span class="giftban__btn">Выбрать сертификат <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+            <span class="giftban__meta">от 900 ₽ · действует 6 месяцев</span>
+          </span>
         </span>
       </a>
     </div>
@@ -304,9 +307,10 @@ if (window.CUERPO_METRIKA){
 </article>
 <article class="card-s reveal">
   <a class="card-s__open" href="uslugi/avtorskiy-massazh/massazh-spiny/index.html">
-    <span class="card-s__pic">
-      <img src="assets/img/int-room-screens.webp" width="900" height="599" loading="lazy" decoding="async" alt="Массажный кабинет с ширмами в салоне Cuerpo в Тольятти">
-      <span class="card-s__more"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+    <span class="card-s__pic shot">
+      <span class="shot__ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8.5h3.2l1.4-2.2h8.8l1.4 2.2H21v10H3z"/><circle cx="12" cy="13.2" r="3.6"/></svg></span>
+      <span class="shot__lab">Нужна фотография</span>
+      <span class="shot__txt">Спина крупным планом: руки мастера разминают зону между лопатками. Тёплый приглушённый свет, масло на коже</span>
     </span>
   </a>
   <div class="card-s__in">
@@ -722,7 +726,9 @@ if (window.CUERPO_METRIKA){
           </li>
         </ul>
         <div style="margin-top:28px; display:flex; flex-wrap:wrap; gap:12px">
-          <a class="btn btn--primary" data-book data-service="Коррекция фигуры">Подобрать программу коррекции</a>
+          <!-- Ведёт в каталог, а не в онлайн-запись: человек, который смотрит
+               «до/после», ещё выбирает программу, а не бронирует время. -->
+          <a class="btn btn--primary" href="uslugi/korrekciya-figury/index.html">Смотреть программы коррекции</a>
         </div>
       </div>
     </div>
@@ -1148,6 +1154,28 @@ if (window.CUERPO_METRIKA){
   </a>
   <a class="btn btn--primary" data-book>Записаться на сеанс</a>
 </div>
+
+<!-- ============================================================
+     ВСПЛЫВАЮЩАЯ ПЛАШКА С ПРЕДЛОЖЕНИЕМ
+
+     !!! ЗАМЕНИТЬ, КОГДА САЛОН ОБЪЯВИТ АКЦИЮ !!!
+     Сейчас здесь подарочный сертификат — единственное предложение, которое
+     у салона реально есть. Придумывать скидку нельзя: сайт живой, и
+     несуществующая акция принесёт претензии, а не записи.
+
+     Как поменять: правьте текст ниже и пересоберите (python3 tools/build.py).
+     Плашка показывается один раз в сутки, после первого экрана.
+     ============================================================ -->
+<aside class="pop" id="pop" role="complementary" aria-label="Предложение мастерской">
+  <button class="pop__x" type="button" data-pop-close aria-label="Закрыть предложение">
+    <svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg>
+  </button>
+  <span class="pop__eyebrow">Подарок, который ждут</span>
+  <p class="pop__ttl">Сертификат на любую программу</p>
+  <p class="pop__txt">На конкретную услугу или на свою сумму. В фирменном конверте
+  или письмом на почту — получатель сам выберет время.</p>
+  <a class="btn btn--light" href="sertifikaty/index.html">Посмотреть сертификаты</a>
+</aside>
 
 <div class="lb" id="lightbox" role="dialog" aria-modal="true" aria-label="Фотография интерьера">
   <button class="lb__x" type="button" aria-label="Закрыть"><svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg></button>

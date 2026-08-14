@@ -652,6 +652,188 @@ body.menu-open .mobile-menu{transform:none; opacity:1; visibility:visible}
   .cards--3{grid-template-columns:repeat(3,1fr)}
 }
 
+/* ---------- Подарочный сертификат: баннер в каталоге ----------
+   Занимает всю ширину сетки и намеренно выбивается из ряда фотоплиток:
+   сплошная тёмная заливка среди светлых снимков читается как «другое».
+   Блик идёт медленно и один раз в восемь секунд — праздничность здесь
+   от золота и типографики, а не от мельтешения. */
+.giftban{
+  grid-column:1 / -1; position:relative; isolation:isolate; overflow:hidden;
+  display:block; border-radius:var(--r-l); color:#F6F1E6;
+  background:
+    radial-gradient(62% 80% at 88% 12%, rgba(201,169,110,.30) 0%, rgba(201,169,110,0) 62%),
+    radial-gradient(52% 70% at 4% 96%, rgba(143,191,172,.16) 0%, rgba(143,191,172,0) 64%),
+    linear-gradient(152deg, #33452B 0%, #24301E 52%, #171F13 100%);
+  box-shadow:var(--shadow-m);
+  transition:transform .5s cubic-bezier(.2,.7,.3,1), box-shadow .5s;
+}
+.giftban:hover{transform:translateY(-3px); box-shadow:var(--shadow-l)}
+
+/* Тонкая золотая рамка внутри — «конвертный» кант */
+.giftban::before{
+  content:''; position:absolute; inset:10px; border-radius:calc(var(--r-l) - 8px);
+  border:1px solid rgba(201,169,110,.34); pointer-events:none; z-index:2;
+}
+.giftban__sheen{
+  position:absolute; top:-60%; bottom:-60%; width:38%; left:-45%; z-index:1;
+  background:linear-gradient(100deg, rgba(255,255,255,0) 0%,
+    rgba(255,246,222,.16) 42%, rgba(255,246,222,.30) 50%, rgba(255,246,222,.16) 58%,
+    rgba(255,255,255,0) 100%);
+  transform:skewX(-14deg); animation:giftSheen 8s ease-in-out infinite;
+}
+@keyframes giftSheen{
+  0%, 68% {left:-45%}
+  92%,100%{left:118%}
+}
+.giftban__in{
+  position:relative; z-index:3; display:block;
+  padding:clamp(30px,4.6vw,58px) clamp(22px,4vw,54px);
+}
+.giftban__eyebrow{
+  display:block; font-size:10.5px; letter-spacing:.24em; text-transform:uppercase;
+  color:#C9A96E; margin-bottom:clamp(12px,1.6vw,18px);
+}
+.giftban__ttl{
+  display:block; font-family:var(--ff-display); font-weight:600;
+  font-size:clamp(34px,6.4vw,68px); line-height:.98; letter-spacing:-.015em;
+  background:linear-gradient(96deg, #FBF5E7 12%, #E8CFA0 42%, #C9A96E 60%, #F3E7CE 82%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.giftban__sub{
+  display:block; margin-top:clamp(14px,1.8vw,20px);
+  font-size:clamp(14px,1.45vw,16.5px); line-height:1.55; color:rgba(246,241,230,.8);
+}
+.giftban__row{
+  display:flex; flex-wrap:wrap; align-items:center; gap:14px 22px;
+  margin-top:clamp(22px,2.8vw,32px);
+}
+.giftban__btn{
+  display:inline-flex; align-items:center; gap:10px;
+  padding:15px 28px; border-radius:999px;
+  background:linear-gradient(100deg, #E4CB9C 0%, #C9A96E 52%, #DCC08C 100%);
+  color:#241F19; font-weight:600; font-size:14px; letter-spacing:.05em;
+  text-transform:uppercase; box-shadow:0 8px 26px rgba(168,138,85,.34);
+  transition:box-shadow .35s, transform .35s;
+}
+.giftban__btn svg{width:17px; height:17px; fill:none; stroke:currentColor; stroke-width:2.1}
+.giftban:hover .giftban__btn{transform:translateX(2px); box-shadow:0 12px 34px rgba(168,138,85,.48)}
+.giftban__meta{font-size:13px; color:rgba(246,241,230,.62); letter-spacing:.02em}
+@media (min-width:900px){
+  .giftban__sub{max-width:46ch}
+}
+@media (prefers-reduced-motion:reduce){
+  .giftban__sheen{animation:none; opacity:0}
+  .giftban, .giftban__btn{transition:none}
+}
+
+/* ---------- Сертификат: номиналы ---------- */
+.denoms{display:grid; gap:10px; grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+.denom{
+  display:flex; flex-direction:column; gap:6px; padding:22px 22px 24px;
+  background:var(--bg-3); border:1px solid var(--line-2); border-radius:var(--r-m);
+  box-shadow:var(--shadow-s);
+}
+.denom__v{font-family:var(--ff-display); font-size:clamp(24px,2.7vw,31px); font-weight:600}
+.denom__t{font-size:13px; color:var(--ink-2); line-height:1.45}
+.denom--own{
+  background:linear-gradient(150deg, #33452B 0%, #24301E 100%);
+  border-color:transparent; color:#F6F1E6;
+}
+.denom--own .denom__v{color:#E4CB9C}
+.denom--own .denom__t{color:rgba(246,241,230,.72)}
+
+/* ---------- Сертификат: меню услуг ----------
+   Здесь список уместен, а в каталоге — нет: человек уже решил дарить
+   и выбирает сумму, ему нужен прайс целиком, а не витрина с фотографиями. */
+.gmenu{display:grid; gap:clamp(24px,3vw,40px); grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.gmenu__h{
+  font-family:var(--ff-display); font-size:clamp(19px,2vw,23px); font-weight:600;
+  padding-bottom:10px; margin-bottom:4px; border-bottom:1px solid var(--line);
+}
+.gmenu__r{
+  display:flex; align-items:baseline; justify-content:space-between; gap:14px;
+  padding:11px 2px; border-bottom:1px solid var(--line-2); color:var(--ink);
+  font-size:14.5px; transition:padding .25s, background .25s;
+}
+.gmenu__r:hover{background:var(--bg-3); padding-left:10px; padding-right:10px}
+.gmenu__r b{font-family:var(--ff-display); font-size:16.5px; font-weight:600; white-space:nowrap}
+
+/* ---------- Сертификат: правила ---------- */
+.grules{display:grid; gap:14px; grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.grules__c{
+  padding:26px 24px 28px; background:var(--bg-3); border:1px solid var(--line-2);
+  border-radius:var(--r-m); box-shadow:var(--shadow-s);
+}
+.grules__ic{display:block; color:var(--green); margin-bottom:14px}
+.grules__ic svg{width:26px; height:26px; fill:none; stroke:currentColor; stroke-width:1.5}
+.grules__c h3{font-family:var(--ff-display); font-size:20px; font-weight:600; margin-bottom:9px}
+.grules__c p{font-size:14.3px; line-height:1.6; color:var(--ink-2); margin:0}
+
+/* ---------- Всплывающая плашка с предложением ----------
+   Появляется один раз за визит, после того как человек прокрутил первый экран:
+   до этого он ещё не понял, куда попал, и закроет её не читая. Закрытие
+   запоминается в localStorage на сутки. */
+.pop{
+  position:fixed; left:16px; bottom:16px; z-index:80; width:min(360px, calc(100vw - 32px));
+  background:linear-gradient(150deg, #33452B 0%, #1E281A 100%); color:#F6F1E6;
+  border-radius:var(--r-m); box-shadow:var(--shadow-l);
+  padding:22px 22px 24px; opacity:0; transform:translateY(14px) scale(.98);
+  pointer-events:none; visibility:hidden;
+  transition:opacity .5s cubic-bezier(.2,.7,.3,1), transform .5s cubic-bezier(.2,.7,.3,1),
+             visibility 0s linear .5s;
+}
+/* Плашка всегда в разметке и прячется стилями, а не атрибутом hidden:
+   у скрытого элемента нет отрендеренного состояния, и переход из него
+   не запускается — плашка появлялась бы рывком. visibility убирает её
+   из озвучки скринридером и из-под курсора, пока она не показана. */
+.pop.is-in{opacity:1; transform:none; pointer-events:auto; visibility:visible;
+  transition-delay:0s, 0s, 0s}
+.pop__x{
+  position:absolute; top:9px; right:9px; width:32px; height:32px;
+  display:grid; place-items:center; border-radius:50%;
+  color:rgba(246,241,230,.55); background:transparent; border:0; cursor:pointer;
+  transition:color .25s, background .25s;
+}
+.pop__x:hover{color:#F6F1E6; background:rgba(246,241,230,.1)}
+.pop__x svg{width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:1.9}
+.pop__eyebrow{
+  display:block; font-size:10px; letter-spacing:.2em; text-transform:uppercase;
+  color:#C9A96E; margin-bottom:9px;
+}
+.pop__ttl{font-family:var(--ff-display); font-size:24px; font-weight:600; line-height:1.15; margin:0 0 8px}
+.pop__txt{font-size:13.6px; line-height:1.55; color:rgba(246,241,230,.78); margin:0 0 16px}
+.pop .btn{width:100%}
+@media (max-width:700px){
+  /* Над мобильной панелью записи, иначе плашка её перекрывает */
+  .pop{bottom:88px; left:12px; right:12px; width:auto}
+}
+@media (prefers-reduced-motion:reduce){ .pop{transition:none} }
+
+/* ---------- Заглушка вместо фотографии ----------
+   Стоит там, где снимок был подобран в интернете. Это не «сломанная
+   картинка», а техзадание на съёмку: держит сетку и говорит, какой кадр
+   нужен. Полосатый фон намеренно не похож на фотографию — заглушку нельзя
+   спутать с готовым блоком и случайно выпустить в таком виде. */
+.shot{
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:9px; padding:20px 16px; text-align:center; color:var(--ink-2);
+  background:
+    repeating-linear-gradient(135deg,
+      rgba(95,122,80,.055) 0 10px, rgba(95,122,80,.015) 10px 20px),
+    var(--bg-2);
+  border:1px dashed rgba(95,122,80,.42);
+}
+.shot__ic{color:var(--green); opacity:.75}
+.shot__ic svg{width:26px; height:26px; display:block; fill:none;
+  stroke:currentColor; stroke-width:1.4; stroke-linejoin:round}
+.shot__lab{font-size:10.5px; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--green); font-weight:500}
+.shot__txt{font-size:12.5px; line-height:1.45; color:var(--ink-2); max-width:30ch}
+.card-s__pic.shot{aspect-ratio:4/3}
+.svcp__stub.shot{min-height:min(58vw,420px); border-radius:var(--r-m)}
+.svcp__stub.shot .shot__txt{font-size:14px; max-width:34ch}
+.svcp__stub.shot .shot__ic svg{width:34px; height:34px}
+
 /* ---------- Прайс-список направления ----------
    Строки под фотокарточками: весь прайс раздела видно сразу, без листания.
    На телефоне длительность уходит под название — цена остаётся справа,
