@@ -590,13 +590,17 @@ POPULAR = [
 ]
 
 TILE = '''      <a class="cat" href="uslugi/%(slug)s/">
-        <img class="cat__img" src="%(img)s" width="%(w)d" height="%(h)d" loading="lazy" decoding="async" alt="%(alt)s">
+        <img class="cat__img" src="%(img)s" width="%(w)d" height="%(h)d" loading="lazy" decoding="async"%(pos)s alt="%(alt)s">
         <span class="cat__body">
           <span class="cat__ttl">%(ttl)s</span>
           <span class="cat__sub">%(sub)s</span>
           <span class="cat__meta">%(meta)s</span>
         </span>
       </a>'''
+
+# Направление с 'wide':True занимает всю ширину сетки. Нужно, когда плиток
+# нечётное число: седьмая квадратная оставила бы полряда пустым.
+WIDE_TILE = TILE.replace('class="cat"', 'class="cat cat--wide"')
 
 
 # Сертификат стоит последним и занимает всю ширину сетки: это не седьмое
@@ -640,9 +644,14 @@ def build_home_section():
     tiles = []
     for d in DIRS:
         img, w, h = IMG[d['img']]
-        tiles.append(TILE % {'slug': d['slug'], 'img': img, 'w': w, 'h': h,
-                             'alt': esc_attr(d['tile_alt']), 'ttl': d['tile_ttl'],
-                             'sub': d['sub'], 'meta': d['tile_meta']})
+        tpl = WIDE_TILE if d.get('wide') else TILE
+        # tile_pos — какая часть снимка остаётся видна в плашке. Широкая плашка
+        # режет фотографию узкой полосой, и центр кадра почти никогда не там,
+        # где главное. Не задан — работает значение по умолчанию из стилей.
+        pos = ' style="object-position:%s"' % d['tile_pos'] if d.get('tile_pos') else ''
+        tiles.append(tpl % {'slug': d['slug'], 'img': img, 'w': w, 'h': h,
+                            'alt': esc_attr(d['tile_alt']), 'ttl': d['tile_ttl'],
+                            'sub': d['sub'], 'meta': d['tile_meta'], 'pos': pos})
     tiles.append(GIFT_TILE)
 
     by_name = dict((x['name'], x) for (o, x) in ALL)
