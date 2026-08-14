@@ -726,21 +726,65 @@ body.menu-open .mobile-menu{transform:none; opacity:1; visibility:visible}
   .giftban, .giftban__btn{transition:none}
 }
 
-/* ---------- Сертификат: номиналы ---------- */
-.denoms{display:grid; gap:10px; grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
-.denom{
-  display:flex; flex-direction:column; gap:6px; padding:22px 22px 24px;
-  background:var(--bg-3); border:1px solid var(--line-2); border-radius:var(--r-m);
-  box-shadow:var(--shadow-s);
+/* ---------- Сертификат: блок покупки ----------
+   Всё решение помещается в один экран: что дарим, сколько, какой сертификат,
+   итог, кнопка. Ни имени, ни телефона — их человек назовёт в переписке. */
+.buy{
+  margin-top:clamp(20px,2.6vw,28px); padding:clamp(20px,2.6vw,28px);
+  background:var(--bg-3); border:1px solid var(--line-2);
+  border-radius:var(--r-m); box-shadow:var(--shadow-s);
 }
-.denom__v{font-family:var(--ff-display); font-size:clamp(24px,2.7vw,31px); font-weight:600}
-.denom__t{font-size:13px; color:var(--ink-2); line-height:1.45}
-.denom--own{
-  background:linear-gradient(150deg, #33452B 0%, #24301E 100%);
-  border-color:transparent; color:#F6F1E6;
+.buy__f{border:0; padding:0; margin:0 0 clamp(16px,2vw,20px)}
+.buy__lg{display:block; font-size:11px; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--ink-3); margin-bottom:9px; padding:0}
+
+/* Переключатель из двух кнопок */
+.seg{display:grid; grid-template-columns:1fr 1fr; gap:6px;
+  background:var(--bg-2); padding:4px; border-radius:999px}
+.seg__b{
+  padding:11px 10px; border:0; border-radius:999px; cursor:pointer;
+  background:transparent; color:var(--ink-2); font-family:var(--ff-text);
+  font-size:14px; transition:background .25s, color .25s, box-shadow .25s;
 }
-.denom--own .denom__v{color:#E4CB9C}
-.denom--own .denom__t{color:rgba(246,241,230,.72)}
+.seg__b:hover{color:var(--ink)}
+.seg__b.is-on{background:var(--bg-3); color:var(--ink); font-weight:500; box-shadow:var(--shadow-s)}
+
+.buy__sum{position:relative; display:flex; align-items:center}
+.buy__inp{
+  width:100%; padding:16px 46px 16px 18px; border-radius:var(--r-m);
+  border:1px solid var(--line); background:var(--bg);
+  font-family:var(--ff-display); font-size:clamp(26px,3.4vw,34px); font-weight:600;
+  color:var(--ink); transition:border-color .25s;
+}
+.buy__inp:focus{outline:0; border-color:var(--green)}
+.buy__cur{position:absolute; right:18px; font-family:var(--ff-display);
+  font-size:clamp(22px,2.8vw,28px); color:var(--ink-3); pointer-events:none}
+.buy__hints{display:flex; flex-wrap:wrap; gap:7px; margin-top:10px}
+.buy__hint{
+  padding:8px 15px; border-radius:999px; cursor:pointer;
+  border:1px solid var(--line); background:transparent; color:var(--ink-2);
+  font-family:var(--ff-text); font-size:13px; transition:border-color .25s, color .25s;
+}
+.buy__hint:hover{border-color:var(--green); color:var(--green)}
+
+.buy__sel{
+  width:100%; padding:15px 40px 15px 16px; border-radius:var(--r-m);
+  border:1px solid var(--line); background:var(--bg); color:var(--ink);
+  font-family:var(--ff-text); font-size:15px; appearance:none;
+  background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236B6153' stroke-width='1.7'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 14px center; background-size:18px;
+}
+.buy__sel:focus{outline:0; border-color:var(--green)}
+.buy__hintline{margin:9px 0 0; font-size:12.5px; color:var(--ink-3)}
+
+.buy__total{
+  display:flex; align-items:baseline; justify-content:space-between; gap:14px;
+  padding:16px 0; margin-bottom:14px; border-top:1px solid var(--line);
+}
+.buy__total span{font-size:13px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3)}
+.buy__total b{font-family:var(--ff-display); font-size:clamp(26px,3.4vw,34px); font-weight:600}
+.buy__go.is-off{opacity:.42; pointer-events:none}
+.buy__small{margin:11px 0 0; font-size:12.5px; color:var(--ink-3); text-align:center}
 
 /* ---------- Сертификат: меню услуг ----------
    Здесь список уместен, а в каталоге — нет: человек уже решил дарить
@@ -757,17 +801,6 @@ body.menu-open .mobile-menu{transform:none; opacity:1; visibility:visible}
 }
 .gmenu__r:hover{background:var(--bg-3); padding-left:10px; padding-right:10px}
 .gmenu__r b{font-family:var(--ff-display); font-size:16.5px; font-weight:600; white-space:nowrap}
-
-/* ---------- Сертификат: правила ---------- */
-.grules{display:grid; gap:14px; grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
-.grules__c{
-  padding:26px 24px 28px; background:var(--bg-3); border:1px solid var(--line-2);
-  border-radius:var(--r-m); box-shadow:var(--shadow-s);
-}
-.grules__ic{display:block; color:var(--green); margin-bottom:14px}
-.grules__ic svg{width:26px; height:26px; fill:none; stroke:currentColor; stroke-width:1.5}
-.grules__c h3{font-family:var(--ff-display); font-size:20px; font-weight:600; margin-bottom:9px}
-.grules__c p{font-size:14.3px; line-height:1.6; color:var(--ink-2); margin:0}
 
 /* ---------- Всплывающая плашка с предложением ----------
    Появляется один раз за визит, после того как человек прокрутил первый экран:

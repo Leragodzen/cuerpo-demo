@@ -31,7 +31,23 @@ var CONFIG = {
   gisUrl: 'https://2gis.ru/togliatti/firm/3096753025849899',
 
   phone: '+7 (927) 892-30-13',
-  phoneRaw: '+79278923013'
+  phoneRaw: '+79278923013',
+
+  /* ПОДАРОЧНЫЙ СЕРТИФИКАТ — куда ведёт кнопка «Оформить».
+
+     Пока онлайн-кассы у салона нет, заказ уходит в мессенджер: человек
+     нажимает кнопку и отправляет готовое сообщение с суммой и типом
+     сертификата, администратор выставляет счёт и присылает сертификат.
+     Персональные данные сайт не собирает — значит, не нужны ни политика
+     обработки, ни согласие.
+
+     Когда появится приём оплаты (Продамус, ЮKassa, сертификаты YCLIENTS),
+     впишите сюда адрес страницы оплаты в payUrl — кнопка начнёт вести
+     туда, а сумма и тип уедут параметрами. Разметку править не нужно. */
+  cert: {
+    payUrl: '',
+    chat: 'https://wa.me/79278923013'
+  }
 };
 
 var $  = function(s, c){ return (c||document).querySelector(s); };
@@ -430,6 +446,117 @@ function setupRail(wrap, rail, prev, next){
   function step(){ var c = box.querySelector('.rev'); return c ? c.offsetWidth + 16 : 320; }
   $('#revNext').addEventListener('click', function(){ box.scrollBy({left: step(), behavior:'smooth'}); });
   $('#revPrev').addEventListener('click', function(){ box.scrollBy({left:-step(), behavior:'smooth'}); });
+})();
+
+/* ---------- Покупка сертификата ----------
+   Считает итог и собирает заказ одной строкой. Сознательно не спрашиваем ни
+   имя, ни телефон, ни почту: их человек назовёт в переписке, а сайт остаётся
+   без персональных данных — иначе нужны политика обработки и согласие.
+   Блок есть только на странице сертификатов. */
+(function(){
+  var form = $('#buy');
+  if (!form) return;
+
+  var sumInp  = $('#buySum', form);
+  var svcSel  = $('#buySvc', form);
+  var totalEl = $('#buyTotal', form);
+  var noteEl  = $('#buyKindNote', form);
+  var goBtn   = $('#buyGo', form);
+  var panes   = { sum: $('[data-pane="sum"]', form), svc: $('[data-pane="svc"]', form) };
+
+  var what = 'sum';
+  var kind = 'Электронный';
+
+  var MIN = 900;   /* дешевле самой дешёвой услуги сертификат не имеет смысла */
+
+  function digits(s){ return (s || '').replace(/[^\d]/g, ''); }
+  function pretty(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); }
+
+  function currentSum(){
+    if (what === 'svc') {
+      var o = svcSel.options[svcSel.selectedIndex];
+      return o ? parseInt(o.getAttribute('data-price'), 10) : 0;
+    }
+    return parseInt(digits(sumInp.value), 10) || 0;
+  }
+
+  function order(){
+    var sum = currentSum();
+    if (what === 'svc') {
+      var o = svcSel.options[svcSel.selectedIndex];
+      var name = o ? o.value : '';
+      /* Часть названий уже в кавычках («Французская талия») — вторые не нужны */
+      if (name.charAt(0) !== '«') name = '«' + name + '»';
+      return kind + ' сертификат на программу ' + name + ' — ' + pretty(sum) + ' ₽';
+    }
+    return kind + ' сертификат на ' + pretty(sum) + ' ₽';
+  }
+
+  function render(){
+    var sum = currentSum();
+    totalEl.textContent = sum ? pretty(sum) + ' ₽' : '—';
+
+    var ok = sum >= MIN;
+    goBtn.classList.toggle('is-off', !ok);
+    goBtn.setAttribute('aria-disabled', ok ? 'false' : 'true');
+
+    var pay = CONFIG.cert && CONFIG.cert.payUrl;
+    if (!ok) {
+      goBtn.removeAttribute('href');
+    } else if (pay) {
+      goBtn.href = pay + (pay.indexOf('?') < 0 ? '?' : '&')
+                 + 'sum=' + sum + '&kind=' + encodeURIComponent(kind);
+    } else {
+      /* Строчная только первая буква: toLowerCase() на всей строке ломал
+         названия программ — «Французская талия» превращалась во «французскую». */
+      var o = order();
+      goBtn.href = CONFIG.cert.chat + '?text='
+                 + encodeURIComponent('Здравствуйте! Хочу ' + o.charAt(0).toLowerCase() + o.slice(1));
+    }
+  }
+
+  /* Переключатели «Сумму / Программу» и «Электронный / Бумажный» */
+  $$('.seg__b', form).forEach(function(b){
+    b.addEventListener('click', function(){
+      var group = b.parentNode;
+      $$('.seg__b', group).forEach(function(x){ x.classList.remove('is-on'); });
+      b.classList.add('is-on');
+
+      if (b.hasAttribute('data-what')) {
+        what = b.getAttribute('data-what');
+        panes.sum.hidden = what !== 'sum';
+        panes.svc.hidden = what !== 'svc';
+      } else {
+        kind = b.getAttribute('data-kind');
+        noteEl.textContent = kind === 'Бумажный'
+          ? 'В фирменном конверте, забрать в салоне'
+          : 'Пришлём на почту письмом';
+      }
+      render();
+    });
+  });
+
+  /* В поле суммы держим только цифры и разделяем разряды на лету */
+  sumInp.addEventListener('input', function(){
+    var d = digits(sumInp.value).slice(0, 7);
+    sumInp.value = d ? pretty(d) : '';
+    render();
+  });
+
+  $$('.buy__hint', form).forEach(function(b){
+    b.addEventListener('click', function(){
+      sumInp.value = pretty(b.getAttribute('data-sum'));
+      render();
+    });
+  });
+
+  svcSel.addEventListener('change', render);
+  form.addEventListener('submit', function(e){ e.preventDefault(); });
+  goBtn.addEventListener('click', function(e){
+    if (goBtn.classList.contains('is-off')) e.preventDefault();
+  });
+
+  render();
 })();
 
 /* ---------- Всплывающая плашка с предложением ----------

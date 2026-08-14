@@ -520,33 +520,40 @@ def build_svc_page(d, s):
 
 # ------------------------------------------------------------------ сертификаты
 
-# Номиналы сертификата. Подобраны под реальный прайс: 1 500 ₽ покрывает
-# массаж головы или бочку, 3 000 ₽ — авторский массаж, 5 000 ₽ — SPA-программу
-# для одного, 9 000 ₽ — программу для двоих.
-# ЗАМЕНИТЬ, когда салон утвердит свои номиналы.
-GIFT_SUMS = [
-    ('1 500 ₽', 'массаж головы, бочка или сауна'),
-    ('3 000 ₽', 'авторский массаж или массаж лица'),
-    ('5 000 ₽', 'SPA-программа для одного'),
-    ('9 000 ₽', 'SPA-программа для двоих'),
-]
+# Быстрые подсказки по сумме — не жёсткие номиналы: сумму можно ввести любую.
+# Это просто три частых значения, чтобы не набирать руками.
+GIFT_HINTS = ['3 000', '5 000', '9 000']
+
+# Направления, которые не показываем в сертификате. Прогрев отдельной
+# услугой в подарок не берут — только внутри SPA-программ.
+GIFT_SKIP_DIRS = ('progretsya',)
 
 
 def build_gift_page():
     base = '../'
     url = 'sertifikaty/'
 
-    sums = '\n'.join(
-        '''        <span class="denom">
-          <span class="denom__v">%s</span>
-          <span class="denom__t">%s</span>
-        </span>''' % (v, t) for v, t in GIFT_SUMS)
+    gift_dirs = [d for d in DIRS if d['slug'] not in GIFT_SKIP_DIRS]
 
-    # Полный прайс сертификата: сгруппирован по направлениям, строкой на услугу.
-    # Здесь это меню, а не витрина — человек уже решил дарить и выбирает номинал,
-    # поэтому карточки с фотографиями только растянули бы страницу на три экрана.
+    hints = '\n'.join(
+        '            <button type="button" class="buy__hint" data-sum="%s">%s ₽</button>'
+        % (h.replace(' ', '').replace(' ', ''), h) for h in GIFT_HINTS)
+
+    # Выпадающий список программ: цена едет в data-price, из неё считается итог.
+    opts = []
+    for d in gift_dirs:
+        opts.append('              <optgroup label="%s">' % d['title'])
+        for s in d['services']:
+            digits = re.sub(r'[^\d]', '', s['price_full'])
+            if not digits:
+                continue
+            opts.append('                <option value="%s" data-price="%s">%s — %s</option>'
+                        % (esc_attr(s['name']), digits, s['title'], s['price_full']))
+        opts.append('              </optgroup>')
+    opts = '\n'.join(opts)
+
     menu = []
-    for d in DIRS:
+    for d in gift_dirs:
         menu.append('        <div class="gmenu__g">')
         menu.append('          <h3 class="gmenu__h">%s</h3>' % d['title'])
         for s in d['services']:
@@ -570,64 +577,70 @@ def build_gift_page():
 
       <div class="reveal">
         <h1>Подарочный сертификат</h1>
-        <p class="pagehead__lead">Самый простой способ подарить близкому человеку время на себя.
-        Сертификат оформляется на любую услугу мастерской или на сумму — получатель сам выберет,
-        что ему нужнее, и придёт тогда, когда будет удобно.</p>
+        <p class="pagehead__lead">Сумма на ваш выбор или конкретная программа.
+        Действует 6 месяцев.</p>
 
-        <div class="prices">
-          <div class="prices__r"><b>от 900 ₽</b><span>на любую услугу из каталога</span></div>
-          <div class="prices__r prices__r--base"><b>6 месяцев</b><span>срок действия</span></div>
-        </div>
+        <!-- ============================================================
+             БЛОК ПОКУПКИ
+             Считает итог и собирает заказ. Куда ведёт кнопка «Оформить» —
+             задаётся в CONFIG.cert в assets/app.js: пока мессенджер,
+             появится онлайн-касса — там же меняется на ссылку оплаты.
+             ============================================================ -->
+        <form class="buy" id="buy" novalidate>
+          <fieldset class="buy__f">
+            <legend class="buy__lg">Что дарим</legend>
+            <div class="seg" role="group">
+              <button type="button" class="seg__b is-on" data-what="sum">Сумму</button>
+              <button type="button" class="seg__b" data-what="svc">Программу</button>
+            </div>
+          </fieldset>
 
-        <div class="svcp__act">
-          <a class="btn btn--primary btn--full" href="tel:+79278923013">Заказать по телефону</a>
-        </div>
+          <div class="buy__f" data-pane="sum">
+            <label class="buy__lg" for="buySum">Сумма подарка</label>
+            <div class="buy__sum">
+              <input class="buy__inp" id="buySum" type="text" inputmode="numeric"
+                     autocomplete="off" value="5 000" aria-label="Сумма сертификата в рублях">
+              <span class="buy__cur">₽</span>
+            </div>
+            <div class="buy__hints">
+%(hints)s
+            </div>
+          </div>
 
-        <p class="svcp__note">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
-          Оформляем в салоне или по телефону <a href="tel:+79278923013">+7 (927) 892-30-13</a>.
-          Выдаём в фирменном конверте — забрать можно в день обращения.
-        </p>
+          <div class="buy__f" data-pane="svc" hidden>
+            <label class="buy__lg" for="buySvc">Программа</label>
+            <select class="buy__sel" id="buySvc">
+%(opts)s
+            </select>
+          </div>
+
+          <fieldset class="buy__f">
+            <legend class="buy__lg">Сертификат</legend>
+            <div class="seg" role="group">
+              <button type="button" class="seg__b is-on" data-kind="Электронный">Электронный</button>
+              <button type="button" class="seg__b" data-kind="Бумажный">Бумажный</button>
+            </div>
+            <p class="buy__hintline" id="buyKindNote">Пришлём на почту письмом</p>
+          </fieldset>
+
+          <div class="buy__total">
+            <span>Итого</span>
+            <b id="buyTotal">5 000 ₽</b>
+          </div>
+
+          <a class="btn btn--primary btn--full buy__go" id="buyGo" href="#">Оформить</a>
+          <p class="buy__small">Ответим и пришлём счёт в рабочее время, ежедневно 09:00–21:00</p>
+        </form>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ============================================================
-     НОМИНАЛЫ
-     Суммы — наше предположение под реальный прайс. ЗАМЕНИТЬ, когда салон
-     утвердит свои. Задаются в GIFT_SUMS в tools/build.py.
-     ============================================================ -->
 <section class="section section--sand">
   <div class="container">
     <div class="head reveal">
-      <p class="eyebrow">Шаг 1</p>
-      <h2 class="h2">Выберите номинал</h2>
-      <p class="lead">Если не знаете, что именно понравится, — дарите сумму.
-      Получатель сам выберет программу, а разницу при желании доплатит в салоне.</p>
-    </div>
-
-    <div class="denoms reveal">
-%(sums)s
-      <span class="denom denom--own">
-        <span class="denom__v">Своя сумма</span>
-        <span class="denom__t">любая, от 900 ₽ — скажите администратору</span>
-      </span>
-    </div>
-  </div>
-</section>
-
-<!-- ============================================================
-     СЕРТИФИКАТ НА КОНКРЕТНУЮ УСЛУГУ
-     Список собирается из tools/data.py — отдельно вести его не нужно.
-     ============================================================ -->
-<section class="section">
-  <div class="container">
-    <div class="head reveal">
-      <p class="eyebrow">Шаг 2, если хотите точнее</p>
-      <h2 class="h2">Или подарите конкретную программу</h2>
-      <p class="lead">Сертификат можно оформить на любую услугу мастерской — вот весь список
-      с ценами. Нажмите на строку, чтобы прочитать, что входит в программу.</p>
+      <p class="eyebrow">Сертификат на программу</p>
+      <h2 class="h2">Что можно подарить</h2>
     </div>
 
     <div class="gmenu reveal">
@@ -635,67 +648,9 @@ def build_gift_page():
     </div>
   </div>
 </section>
-
-<!-- ============================================================
-     ПРАВИЛА
-     Формулировки даны салоном. Электронный сертификат сейчас оформляется
-     администратором вручную — автоматической оплаты на сайте нет.
-     ============================================================ -->
-<section class="section section--sand">
-  <div class="container">
-    <div class="head reveal">
-      <p class="eyebrow">Как получить</p>
-      <h2 class="h2">Бумажный и электронный</h2>
-    </div>
-
-    <div class="grules">
-      <article class="grules__c reveal">
-        <span class="grules__ic"><svg viewBox="0 0 24 24">%(heart)s</svg></span>
-        <h3>Бумажный, в конверте</h3>
-        <p>После оплаты сертификат можно забрать в салоне в рабочее время —
-        ежедневно с 09:00 до 21:00, Приморский бульвар, 57.</p>
-      </article>
-
-      <article class="grules__c reveal d1">
-        <span class="grules__ic"><svg viewBox="0 0 24 24">%(star)s</svg></span>
-        <h3>Электронный, на почту</h3>
-        <p>После оплаты электронного сертификата отправим его на вашу почту
-        в течение 60 минут. Если вы оформили сертификат после 22:00,
-        отправим на почту в 09:00 следующего дня.</p>
-      </article>
-
-      <article class="grules__c reveal d2">
-        <span class="grules__ic"><svg viewBox="0 0 24 24">%(clock)s</svg></span>
-        <h3>Срок действия</h3>
-        <p>Полгода с момента покупки. Активировать заранее не нужно —
-        получатель просто называет номер сертификата при записи.</p>
-      </article>
-    </div>
-
-    <div class="pick reveal" style="margin-top:clamp(28px,4vw,44px)">
-      <div>
-        <h3>Оформить сертификат</h3>
-        <p>Позвоните или напишите — администратор подскажет, что выбрать под повод
-        и бюджет, оформит сертификат и подготовит конверт. Электронный пришлём
-        на почту письмом.</p>
-        <a class="pick__tel" href="tel:+79278923013">
-          <svg viewBox="0 0 24 24"><path d="M21 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 1.1 4.2 2 2 0 0 1 3.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.4 2.1L7.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.4 1.8.6 2.8.8a2 2 0 0 1 1.7 2z"/></svg>
-          +7 (927) 892-30-13
-        </a>
-      </div>
-      <div class="pick__f">
-        <p class="pick__f-ttl">Написать в мессенджер</p>
-        <p class="pick__f-txt">Telegram, MAX или VK — по тому же номеру.
-        Ответим в рабочее время, ежедневно с 09:00 до 21:00.</p>
-        <a class="btn btn--light btn--full" href="https://t.me/+79278923013" target="_blank" rel="noopener">Написать в Telegram</a>
-      </div>
-    </div>
-  </div>
-</section>
 ''' % {
         'crumbs': crumbs([('Главная', base), ('Подарочный сертификат', None)]),
-        'base': base, 'heart': IC['heart'], 'star': IC['star'], 'clock': IC['clock'],
-        'sums': sums, 'menu': menu,
+        'base': base, 'hints': hints, 'opts': opts, 'menu': menu,
     }
     ld = '''<script type="application/ld+json">
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
@@ -705,7 +660,7 @@ def build_gift_page():
     return write(url + 'index.html', page(
         base, url,
         'Подарочный сертификат на массаж в Тольятти | Cuerpo',
-        'Подарочный сертификат массажного салона Cuerpo в Тольятти: на любую услугу от 900 ₽ или на свою сумму, срок действия 6 месяцев, бумажный в конверте и электронный на почту. Приморский бульвар 57, +7 (927) 892-30-13.',
+        'Подарочный сертификат массажного салона Cuerpo в Тольятти: на любую сумму или на конкретную программу, электронный на почту или бумажный в конверте, срок действия 6 месяцев. Приморский бульвар 57, +7 (927) 892-30-13.',
         body, ld))
 
 
