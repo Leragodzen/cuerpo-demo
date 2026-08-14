@@ -191,11 +191,12 @@ if (window.CUERPO_METRIKA){
      автоматически: python3 tools/build.py. Правьте tools/data.py —
      ручные правки здесь потеряются при следующей сборке.
 
-     !!! ВНИМАНИЕ ПЕРЕД ПУБЛИКАЦИЕЙ !!!
-     Промокод «ПЕРВЫЙ» и цены со скидкой — ДЕМОНСТРАЦИОННАЯ ЗАГЛУШКА,
-     салон такой акции не объявлял. Задаётся полем promo в tools/data.py
-     у четырёх услуг. Замените на реальные условия акции либо уберите
-     это поле и пересоберите сайт.
+     Цены и составы программ — из фирменной брошюры салона (август 2026),
+     она лежит в _ot-klienta/uslugi/.
+
+     Выдуманный промокод «ПЕРВЫЙ» убран вместе с демо-скидками. Механика
+     акции в сборщике осталась: когда салон объявит реальную акцию,
+     достаточно добавить услуге поле promo в tools/data.py.
      ============================================================ -->
 <section class="section section--sand" id="services">
   <div class="container">
@@ -211,16 +212,16 @@ if (window.CUERPO_METRIKA){
         <img class="cat__img" src="assets/img/svc-back.webp" width="1023" height="1537" loading="lazy" decoding="async" alt="Руки мастера прорабатывают спину на сеансе авторского массажа в салоне Cuerpo в Тольятти">
         <span class="cat__body">
           <span class="cat__ttl">Авторский<br>массаж</span>
-          <span class="cat__sub">оздоровительный · классический · спортивный</span>
-          <span class="cat__meta">4 услуги · от 1 200 ₽</span>
+          <span class="cat__sub">авторский · классический · спортивный · испанский</span>
+          <span class="cat__meta">6 услуг · от 1 200 ₽</span>
         </span>
       </a>
       <a class="cat" href="uslugi/massazh-lica/index.html">
         <img class="cat__img" src="assets/img/svc-face.webp" width="1023" height="1537" loading="lazy" decoding="async" alt="Массаж лица и головы в массажном салоне Cuerpo в Тольятти">
         <span class="cat__body">
           <span class="cat__ttl">Лицо<br>и голова</span>
-          <span class="cat__sub">буккальный · омолаживающий · расслабляющий</span>
-          <span class="cat__meta">6 услуг</span>
+          <span class="cat__sub">буккальный · омолаживающий · мужской · массаж головы</span>
+          <span class="cat__meta">7 услуг · от 1 200 ₽</span>
         </span>
       </a>
       <a class="cat" href="uslugi/korrekciya-figury/index.html">
@@ -235,8 +236,8 @@ if (window.CUERPO_METRIKA){
         <img class="cat__img" src="assets/img/svc-salt-scrub.webp" width="1023" height="1537" loading="lazy" decoding="async" alt="Солевой скраб на SPA-программе в массажном салоне Cuerpo в Тольятти">
         <span class="cat__body">
           <span class="cat__ttl">SPA-<br>программы</span>
-          <span class="cat__sub">ритуалы на 2–3 часа с чайной церемонией</span>
-          <span class="cat__meta">7 услуг · от 1 200 ₽</span>
+          <span class="cat__sub">ритуалы 1–3 часа · расслабляющий массаж · горячие камни</span>
+          <span class="cat__meta">6 услуг · от 2 500 ₽</span>
         </span>
       </a>
       <a class="cat" href="uslugi/vdvoem/index.html">
@@ -244,7 +245,7 @@ if (window.CUERPO_METRIKA){
         <span class="cat__body">
           <span class="cat__ttl">Вдвоём</span>
           <span class="cat__sub">один кабинет, два мастера, общий ритуал</span>
-          <span class="cat__meta">для пары и подруг</span>
+          <span class="cat__meta">7 программ · от 5 800 ₽</span>
         </span>
       </a>
       <a class="cat" href="uslugi/progretsya/index.html">
@@ -282,44 +283,43 @@ if (window.CUERPO_METRIKA){
     <div class="rail-s reveal">
       <div class="rail-s__track">
 <article class="card-s reveal">
-  <a class="card-s__open" href="uslugi/avtorskiy-massazh/massazh-spiny/index.html">
+  <a class="card-s__open" href="uslugi/avtorskiy-massazh/avtorskiy-massazh-spiny/index.html">
     <span class="card-s__pic">
-      <img src="assets/img/u-back.webp" width="784" height="732" loading="lazy" decoding="async" alt="Классический массаж спины в салоне Cuerpo в Тольятти">
+      <img src="assets/img/u-back.webp" width="784" height="732" loading="lazy" decoding="async" alt="Авторский массаж спины в салоне Cuerpo в Тольятти">
       <span class="card-s__more"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
     </span>
   </a>
   <div class="card-s__in">
-    <span class="card-s__promo">1 020 ₽</span>
-    <span class="card-s__note">первый визит по промокоду «ПЕРВЫЙ»</span>
-    <span class="card-s__old">от 1 200 ₽</span>
+    <span class="card-s__price"><small>от</small> 1 900 ₽</span>
+    <a class="card-s__ttl" href="uslugi/avtorskiy-massazh/avtorskiy-massazh-spiny/index.html">Авторский массаж спины или ног</a>
+    <span class="card-s__txt">Фирменная техника мастерской. На выбор — спина или ноги.</span>
+    <span class="card-s__tags"><span class="card-s__tag">спина или ноги</span><span class="card-s__tag">авторская техника</span></span>
+    <div class="dur dur--card" role="group" aria-label="Длительность сеанса">
+  <span class="dur__b is-active">Мастер · 60 мин</span>
+  <span class="dur__b">Старший мастер · 45–60 мин</span>
+  <span class="dur__b">Мастер-эксперт · 45 мин</span>
+</div>
+  </div>
+  <a class="btn btn--ghost btn--sm" data-book data-service="Авторский массаж спины или ног">Записаться</a>
+</article>
+<article class="card-s reveal">
+  <a class="card-s__open" href="uslugi/avtorskiy-massazh/massazh-spiny/index.html">
+    <span class="card-s__pic">
+      <img src="assets/img/int-room-screens.webp" width="900" height="599" loading="lazy" decoding="async" alt="Массажный кабинет с ширмами в салоне Cuerpo в Тольятти">
+      <span class="card-s__more"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+    </span>
+  </a>
+  <div class="card-s__in">
+    <span class="card-s__price"><small>от</small> 1 200 ₽</span>
     <a class="card-s__ttl" href="uslugi/avtorskiy-massazh/massazh-spiny/index.html">Классический массаж спины</a>
-    <span class="card-s__txt">Глубокие движения для зажатых мышц спины и шейно-воротниковой зоны.</span>
+    <span class="card-s__txt">Спина, ягодичные мышцы и шейно-воротниковая зона.</span>
     <span class="card-s__tags"><span class="card-s__tag">спина и шея</span></span>
     <div class="dur dur--card" role="group" aria-label="Длительность сеанса">
-  <span class="dur__b is-active">≈ 60 мин</span>
+  <span class="dur__b is-active">30 минут</span>
+  <span class="dur__b">45 минут</span>
 </div>
   </div>
   <a class="btn btn--ghost btn--sm" data-book data-service="Классический массаж спины">Записаться</a>
-</article>
-<article class="card-s reveal">
-  <a class="card-s__open" href="uslugi/korrekciya-figury/francuzskaya-taliya/index.html">
-    <span class="card-s__pic">
-      <img src="assets/img/u-waist.webp" width="1448" height="1086" loading="lazy" decoding="async" alt="Результат до и после программы «Французская талия» в салоне Cuerpo в Тольятти">
-      <span class="card-s__more"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
-    </span>
-  </a>
-  <div class="card-s__in">
-    <span class="card-s__promo">3 230 ₽</span>
-    <span class="card-s__note">первый визит по промокоду «ПЕРВЫЙ»</span>
-    <span class="card-s__old">3 800 ₽</span>
-    <a class="card-s__ttl" href="uslugi/korrekciya-figury/francuzskaya-taliya/index.html">«Французская талия»</a>
-    <span class="card-s__txt">Ручной и аппаратный массаж боков, живота и ног с MICRO-WAVE.</span>
-    <span class="card-s__tags"><span class="card-s__tag">+ подарок</span></span>
-    <div class="dur dur--card" role="group" aria-label="Длительность сеанса">
-  <span class="dur__b is-active">≈ 90 мин</span>
-</div>
-  </div>
-  <a class="btn btn--ghost btn--sm" data-book data-service="Французская талия">Записаться</a>
 </article>
 <article class="card-s reveal">
   <a class="card-s__open" href="uslugi/massazh-lica/bukkalnyy-massazh/index.html">
@@ -329,68 +329,33 @@ if (window.CUERPO_METRIKA){
     </span>
   </a>
   <div class="card-s__in">
-    <span class="card-s__price"><small>цена по запросу</small></span>
-    <a class="card-s__ttl" href="uslugi/massazh-lica/bukkalnyy-massazh/index.html">Буккальный массаж лица</a>
-    <span class="card-s__txt">Глубокая работа с мышцами лица изнутри и снаружи.</span>
-    <span class="card-s__tags"><span class="card-s__tag">лифтинг</span></span>
+    <span class="card-s__price">2 200 ₽</span>
+    <a class="card-s__ttl" href="uslugi/massazh-lica/bukkalnyy-massazh/index.html">Буккальный (скульптурный) массаж лица</a>
+    <span class="card-s__txt">Работа с мышцами лица изнутри и снаружи. Видимый эффект с 1–3 раза.</span>
+    <span class="card-s__tags"><span class="card-s__tag">лифтинг</span><span class="card-s__tag">+ декольте</span></span>
     <div class="dur dur--card" role="group" aria-label="Длительность сеанса">
-  <span class="dur__b is-active">≈ 60 мин</span>
+  <span class="dur__b is-active">1 час</span>
 </div>
   </div>
   <a class="btn btn--ghost btn--sm" data-book data-service="Буккальный массаж лица">Записаться</a>
 </article>
 <article class="card-s reveal">
-  <a class="card-s__open" href="uslugi/spa-programmy/desert-dlya-dushi/index.html">
+  <a class="card-s__open" href="uslugi/korrekciya-figury/francuzskaya-taliya/index.html">
     <span class="card-s__pic">
-      <img src="assets/img/u-oil.webp" width="1205" height="1509" loading="lazy" decoding="async" alt="SPA-программа «Десерт для души»: ароматное масло на спине в салоне Cuerpo в Тольятти">
+      <img src="assets/img/u-waist.webp" width="1448" height="1086" loading="lazy" decoding="async" alt="Результат до и после программы «Французская талия» в салоне Cuerpo в Тольятти">
       <span class="card-s__more"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
     </span>
   </a>
   <div class="card-s__in">
-    <span class="card-s__price">6 500 ₽</span>
-    <a class="card-s__ttl" href="uslugi/spa-programmy/desert-dlya-dushi/index.html">«Десерт для души»</a>
-    <span class="card-s__txt">Бочка, скрабирование, испанский массаж, обёртывание, чай.</span>
-    <span class="card-s__tags"><span class="card-s__tag">полный ритуал</span></span>
+    <span class="card-s__price">3 800 ₽</span>
+    <a class="card-s__ttl" href="uslugi/korrekciya-figury/francuzskaya-taliya/index.html">«Французская талия»</a>
+    <span class="card-s__txt">Ручной и аппаратный массаж боков, живота и ног с micro-wave.</span>
+    <span class="card-s__tags"><span class="card-s__tag">+ подарок</span><span class="card-s__tag">ручной и аппаратный</span></span>
     <div class="dur dur--card" role="group" aria-label="Длительность сеанса">
-  <span class="dur__b is-active">≈ 3 часа</span>
+  <span class="dur__b is-active">2 часа</span>
 </div>
   </div>
-  <a class="btn btn--ghost btn--sm" data-book data-service="SPA-программа «Десерт для души»">Записаться</a>
-</article>
-<article class="card-s reveal">
-  <a class="card-s__open" href="uslugi/vdvoem/spa-dlya-dvoih/index.html">
-    <span class="card-s__pic">
-      <img src="assets/img/u-duo2.webp" width="800" height="1200" loading="lazy" decoding="async" alt="SPA-программа для двоих: два мастера работают одновременно в салоне Cuerpo в Тольятти">
-      <span class="card-s__more"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
-    </span>
-  </a>
-  <div class="card-s__in">
-    <span class="card-s__price"><small>по выбранной программе</small></span>
-    <a class="card-s__ttl" href="uslugi/vdvoem/spa-dlya-dvoih/index.html">SPA-программа для двоих</a>
-    <span class="card-s__txt">Один кабинет, два мастера, весь ритуал вместе.</span>
-    <span class="card-s__tags"><span class="card-s__tag">два мастера</span><span class="card-s__tag">парный кабинет</span></span>
-  </div>
-  <a class="btn btn--ghost btn--sm" data-book data-service="SPA-программа для двоих">Записаться</a>
-</article>
-<article class="card-s reveal">
-  <a class="card-s__open" href="uslugi/progretsya/kedrovaya-bochka/index.html">
-    <span class="card-s__pic">
-      <img src="assets/img/svc-barrel.webp" width="1023" height="1537" loading="lazy" decoding="async" alt="Кедровая бочка и душ в массажном салоне Cuerpo в Тольятти">
-      <span class="card-s__more"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
-    </span>
-  </a>
-  <div class="card-s__in">
-    <span class="card-s__promo">760 ₽</span>
-    <span class="card-s__note">первый визит по промокоду «ПЕРВЫЙ»</span>
-    <span class="card-s__old">900 ₽</span>
-    <a class="card-s__ttl" href="uslugi/progretsya/kedrovaya-bochka/index.html">Кедровая бочка</a>
-    <span class="card-s__txt">Горячий кедровый пар прогревает тело, голова снаружи.</span>
-    <span class="card-s__tags"><span class="card-s__tag">перед массажем</span></span>
-    <div class="dur dur--card" role="group" aria-label="Длительность сеанса">
-  <span class="dur__b is-active">20–30 мин</span>
-</div>
-  </div>
-  <a class="btn btn--ghost btn--sm" data-book data-service="Кедровая бочка">Записаться</a>
+  <a class="btn btn--ghost btn--sm" data-book data-service="«Французская талия»">Записаться</a>
 </article>
 <article class="card-s reveal">
   <a class="card-s__open" href="uslugi/spa-programmy/relax/index.html">
@@ -400,35 +365,69 @@ if (window.CUERPO_METRIKA){
     </span>
   </a>
   <div class="card-s__in">
-    <span class="card-s__promo">3 650 ₽</span>
-    <span class="card-s__note">первый визит по промокоду «ПЕРВЫЙ»</span>
-    <span class="card-s__old">4 300 ₽</span>
+    <span class="card-s__price">4 300 ₽</span>
     <a class="card-s__ttl" href="uslugi/spa-programmy/relax/index.html">«Relax»</a>
-    <span class="card-s__txt">Бочка, расслабляющий массаж тела, массаж головы, чай.</span>
+    <span class="card-s__txt">Бочка, расслабляющий массаж всего тела, массаж головы, чай.</span>
     <span class="card-s__tags"><span class="card-s__tag">самый спокойный</span></span>
     <div class="dur dur--card" role="group" aria-label="Длительность сеанса">
-  <span class="dur__b is-active">≈ 2 ч</span>
+  <span class="dur__b is-active">100 минут</span>
 </div>
   </div>
   <a class="btn btn--ghost btn--sm" data-book data-service="SPA-программа «Relax»">Записаться</a>
 </article>
 <article class="card-s reveal">
-  <a class="card-s__open" href="uslugi/dlya-beremennyh/massazh-dlya-beremennyh/index.html">
+  <a class="card-s__open" href="uslugi/progretsya/kedrovaya-bochka/index.html">
     <span class="card-s__pic">
-      <img src="assets/img/u-preg.webp" width="736" height="552" loading="lazy" decoding="async" alt="Массаж для беременных в салоне Cuerpo в Тольятти">
+      <img src="assets/img/svc-barrel.webp" width="1023" height="1537" loading="lazy" decoding="async" alt="Кедровая бочка и душ в массажном салоне Cuerpo в Тольятти">
       <span class="card-s__more"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
     </span>
   </a>
   <div class="card-s__in">
-    <span class="card-s__price">3 000 ₽</span>
-    <a class="card-s__ttl" href="uslugi/dlya-beremennyh/massazh-dlya-beremennyh/index.html">Массаж для беременных</a>
-    <span class="card-s__txt">Деликатная работа с учётом срока: спина, ноги, стопы.</span>
-    <span class="card-s__tags"><span class="card-s__tag">со 2 триместра</span></span>
+    <span class="card-s__price">900 ₽</span>
+    <a class="card-s__ttl" href="uslugi/progretsya/kedrovaya-bochka/index.html">Кедровая бочка</a>
+    <span class="card-s__txt">Горячий кедровый пар прогревает тело, голова снаружи.</span>
+    <span class="card-s__tags"><span class="card-s__tag">перед массажем</span></span>
     <div class="dur dur--card" role="group" aria-label="Длительность сеанса">
-  <span class="dur__b is-active">≈ 60 мин</span>
+  <span class="dur__b is-active">20–30 минут</span>
 </div>
   </div>
-  <a class="btn btn--ghost btn--sm" data-book data-service="Массаж для беременных">Записаться</a>
+  <a class="btn btn--ghost btn--sm" data-book data-service="Кедровая бочка">Записаться</a>
+</article>
+<article class="card-s reveal">
+  <a class="card-s__open" href="uslugi/vdvoem/malenkoe-puteshestvie/index.html">
+    <span class="card-s__pic">
+      <img src="assets/img/u-duo2.webp" width="800" height="1200" loading="lazy" decoding="async" alt="SPA-программа для двоих: два мастера работают одновременно в салоне Cuerpo в Тольятти">
+      <span class="card-s__more"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+    </span>
+  </a>
+  <div class="card-s__in">
+    <span class="card-s__price">5 900 ₽</span>
+    <a class="card-s__ttl" href="uslugi/vdvoem/malenkoe-puteshestvie/index.html">«Маленькое путешествие»</a>
+    <span class="card-s__txt">Бочка, одновременный массаж спины и ног, для него и для неё.</span>
+    <span class="card-s__tags"><span class="card-s__tag">два мастера</span><span class="card-s__tag">самая короткая</span></span>
+    <div class="dur dur--card" role="group" aria-label="Длительность сеанса">
+  <span class="dur__b is-active">100 минут</span>
+</div>
+  </div>
+  <a class="btn btn--ghost btn--sm" data-book data-service="SPA для двоих «Маленькое путешествие»">Записаться</a>
+</article>
+<article class="card-s reveal">
+  <a class="card-s__open" href="uslugi/massazh-lica/massazh-golovy/index.html">
+    <span class="card-s__pic">
+      <img src="assets/img/u-neck.webp" width="736" height="736" loading="lazy" decoding="async" alt="SPA-массаж головы и шеи в салоне Cuerpo в Тольятти">
+      <span class="card-s__more"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
+    </span>
+  </a>
+  <div class="card-s__in">
+    <span class="card-s__price">1 200 ₽</span>
+    <a class="card-s__ttl" href="uslugi/massazh-lica/massazh-golovy/index.html">SPA-массаж головы</a>
+    <span class="card-s__txt">Мышцы шеи, головы, лба и ушей. Полчаса — и голова ясная.</span>
+    <span class="card-s__tags"><span class="card-s__tag">для крепкого сна</span></span>
+    <div class="dur dur--card" role="group" aria-label="Длительность сеанса">
+  <span class="dur__b is-active">30 минут</span>
+</div>
+  </div>
+  <a class="btn btn--ghost btn--sm" data-book data-service="SPA-массаж головы">Записаться</a>
 </article>
       </div>
     </div>
@@ -1126,10 +1125,10 @@ if (window.CUERPO_METRIKA){
     <!-- Разделы одной строкой: и навигация, и ключевые слова для поиска -->
     <nav class="footer__links" aria-label="Разделы сайта">
       <a href="#services">Услуги и цены</a>
-      <a href="uslugi/avtorskiy-massazh/massazh-spiny/index.html">Массаж спины</a>
+      <a href="uslugi/avtorskiy-massazh/index.html">Массаж спины</a>
       <a href="uslugi/korrekciya-figury/index.html">Коррекция фигуры</a>
       <a href="uslugi/massazh-lica/index.html">Массаж лица</a>
-      <a href="uslugi/vdvoem/spa-dlya-dvoih/index.html">SPA для двоих</a>
+      <a href="uslugi/vdvoem/index.html">SPA для двоих</a>
       <a href="sertifikaty/index.html">Сертификат</a>
       <a href="#masters">Мастера</a>
       <a href="#reviews">Отзывы</a>
@@ -1201,26 +1200,35 @@ if (window.CUERPO_METRIKA){
     "@type": "OfferCatalog",
     "name": "Услуги массажного салона Cuerpo",
     "itemListElement": [
+      {"@type":"Offer","itemOffered":{"@type":"Service","name":"Авторский массаж спины или ног"},"price":"1900","priceCurrency":"RUB"},
+      {"@type":"Offer","itemOffered":{"@type":"Service","name":"Авторский комплекс"},"price":"3000","priceCurrency":"RUB"},
       {"@type":"Offer","itemOffered":{"@type":"Service","name":"Классический массаж спины"},"price":"1200","priceCurrency":"RUB"},
       {"@type":"Offer","itemOffered":{"@type":"Service","name":"Классический массаж всего тела"},"price":"2500","priceCurrency":"RUB"},
       {"@type":"Offer","itemOffered":{"@type":"Service","name":"Спортивный массаж"},"price":"3800","priceCurrency":"RUB"},
       {"@type":"Offer","itemOffered":{"@type":"Service","name":"Испанский массаж всего тела"},"price":"3800","priceCurrency":"RUB"},
-      {"@type":"Offer","itemOffered":{"@type":"Service","name":"Буккальный массаж лица"}},
-      {"@type":"Offer","itemOffered":{"@type":"Service","name":"Омолаживающий массаж лица"}},
-      {"@type":"Offer","itemOffered":{"@type":"Service","name":"Комплекс «Формула красоты»"}},
-      {"@type":"Offer","itemOffered":{"@type":"Service","name":"Комплекс «Моментальное преображение»"}},
-      {"@type":"Offer","itemOffered":{"@type":"Service","name":"Мужской массаж лица"}},
+      {"@type":"Offer","itemOffered":{"@type":"Service","name":"Буккальный массаж лица"},"price":"2200","priceCurrency":"RUB"},
+      {"@type":"Offer","itemOffered":{"@type":"Service","name":"Комплекс «Моментальное преображение»"},"price":"3200","priceCurrency":"RUB"},
       {"@type":"Offer","itemOffered":{"@type":"Service","name":"SPA-массаж головы"},"price":"1200","priceCurrency":"RUB"},
-      {"@type":"Offer","itemOffered":{"@type":"Service","name":"Французская талия"},"price":"3800","priceCurrency":"RUB"},
-      {"@type":"Offer","itemOffered":{"@type":"Service","name":"Антицеллюлитный массаж (комплекс)"},"price":"2900","priceCurrency":"RUB"},
-      {"@type":"Offer","itemOffered":{"@type":"Service","name":"Антицеллюлитный массаж (ноги)"},"price":"2200","priceCurrency":"RUB"},
+      {"@type":"Offer","itemOffered":{"@type":"Service","name":"Массаж лица и головы"},"price":"1500","priceCurrency":"RUB"},
+      {"@type":"Offer","itemOffered":{"@type":"Service","name":"Омолаживающий массаж лица"},"price":"1200","priceCurrency":"RUB"},
+      {"@type":"Offer","itemOffered":{"@type":"Service","name":"Мужской массаж лица"},"price":"2500","priceCurrency":"RUB"},
+      {"@type":"Offer","itemOffered":{"@type":"Service","name":"Комплекс «Формула красоты»"},"price":"3200","priceCurrency":"RUB"},
+      {"@type":"Offer","itemOffered":{"@type":"Service","name":"«Французская талия»"},"price":"3800","priceCurrency":"RUB"},
+      {"@type":"Offer","itemOffered":{"@type":"Service","name":"Антицеллюлитный массаж проблемных зон"},"price":"2900","priceCurrency":"RUB"},
+      {"@type":"Offer","itemOffered":{"@type":"Service","name":"Антицеллюлитный массаж ног"},"price":"2200","priceCurrency":"RUB"},
       {"@type":"Offer","itemOffered":{"@type":"Service","name":"SPA-программа «Десерт для души»"},"price":"6500","priceCurrency":"RUB"},
-      {"@type":"Offer","itemOffered":{"@type":"Service","name":"SPA-программа «Удовольствие»"},"price":"4900","priceCurrency":"RUB"},
       {"@type":"Offer","itemOffered":{"@type":"Service","name":"SPA-программа «Relax»"},"price":"4300","priceCurrency":"RUB"},
-      {"@type":"Offer","itemOffered":{"@type":"Service","name":"SPA-программа «Лакомство для тела»"},"price":"2800","priceCurrency":"RUB"},
       {"@type":"Offer","itemOffered":{"@type":"Service","name":"Массаж горячими камнями"},"price":"3000","priceCurrency":"RUB"},
+      {"@type":"Offer","itemOffered":{"@type":"Service","name":"SPA-программа «Удовольствие»"},"price":"4900","priceCurrency":"RUB"},
+      {"@type":"Offer","itemOffered":{"@type":"Service","name":"SPA-программа «Великий Зевс»"},"price":"5600","priceCurrency":"RUB"},
       {"@type":"Offer","itemOffered":{"@type":"Service","name":"SPA-массаж всего тела"},"price":"2500","priceCurrency":"RUB"},
-      {"@type":"Offer","itemOffered":{"@type":"Service","name":"SPA-программа для двоих"}},
+      {"@type":"Offer","itemOffered":{"@type":"Service","name":"SPA для двоих «Маленькое путешествие»"},"price":"5900","priceCurrency":"RUB"},
+      {"@type":"Offer","itemOffered":{"@type":"Service","name":"SPA для двоих «Двойной Испанский»"},"price":"9200","priceCurrency":"RUB"},
+      {"@type":"Offer","itemOffered":{"@type":"Service","name":"SPA для двоих «Для влюблённых»"},"price":"6900","priceCurrency":"RUB"},
+      {"@type":"Offer","itemOffered":{"@type":"Service","name":"SPA для двоих «Love is»"},"price":"7900","priceCurrency":"RUB"},
+      {"@type":"Offer","itemOffered":{"@type":"Service","name":"SPA для двоих «Девичник»"},"price":"7300","priceCurrency":"RUB"},
+      {"@type":"Offer","itemOffered":{"@type":"Service","name":"SPA для двоих «Вулкан для двоих»"},"price":"8800","priceCurrency":"RUB"},
+      {"@type":"Offer","itemOffered":{"@type":"Service","name":"SPA «Мама и дочка — принцесса»"},"price":"5800","priceCurrency":"RUB"},
       {"@type":"Offer","itemOffered":{"@type":"Service","name":"Кедровая бочка"},"price":"900","priceCurrency":"RUB"},
       {"@type":"Offer","itemOffered":{"@type":"Service","name":"Сауна с гималайской солью"},"price":"1100","priceCurrency":"RUB"},
       {"@type":"Offer","itemOffered":{"@type":"Service","name":"Массаж для беременных"},"price":"3000","priceCurrency":"RUB"}

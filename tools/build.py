@@ -239,6 +239,48 @@ def card(s, href, base, main=False):
     return '\n'.join(L)
 
 
+def price_list(d, href_for):
+    """Прайс-список под карточками направления.
+
+    Карточка с фотографией — дорогая: она занимает экран и требует снимка,
+    которого у нас на каждую услугу нет. Поэтому фотокарточки получают только
+    услуги с 'feat', а всё остальное живёт строками «название · длительность ·
+    цена». Человек видит весь прайс направления, не пролистывая десять плиток,
+    а подробная страница есть у каждой строки.
+    """
+    # Список нужен, только если он что-то добавляет к карточкам. Там, где все
+    # услуги и так показаны фотокарточками, он был бы просто их повтором.
+    if all(s.get('feat') for s in d['services']):
+        return ''
+    rows = []
+    for s in d['services']:
+        # У услуг с переключателем цены длительностей несколько — в строке
+        # показываем диапазон, точные варианты человек увидит на странице.
+        if s.get('durations'):
+            a, b = s['durations'][0]['label'], s['durations'][-1]['label']
+            pa, pb = a.rsplit(' ', 1), b.rsplit(' ', 1)
+            # «30 минут» и «45 минут» → «30–45 минут», а не «30 минут — 45 минут»
+            dur = '%s–%s %s' % (pa[0], pb[0], pa[1]) if len(pa) == 2 and pa[1] == pb[1] else '%s — %s' % (a, b)
+        else:
+            dur = s.get('dur', '')
+        rows.append(
+            '      <a class="plist__r" href="%s">\n'
+            '        <span class="plist__n">%s</span>\n'
+            '        <span class="plist__d">%s</span>\n'
+            '        <span class="plist__p">%s</span>\n'
+            '        <span class="plist__go" aria-hidden="true">%s</span>\n'
+            '      </a>' % (href_for(s), s['title'], dur, s['price_full'], ARROW))
+    return '''
+    <div class="plist reveal">
+      <div class="plist__head">
+        <h2 class="h3">Все услуги и цены направления</h2>
+        <span class="plist__hint">Нажмите на строку — откроется описание и запись</span>
+      </div>
+%s
+    </div>
+''' % '\n'.join(rows)
+
+
 def eff_block(s):
     out = ['<h2 class="h3">Что вас ждёт</h2>', '<ul class="svc-full__eff">']
     for ic, txt in s['eff']:
@@ -311,8 +353,9 @@ def build_dir_page(d):
         ds, ss = HOME[s['name']]
         return '%s/' % ss if ds == d['slug'] else '../%s/%s/' % (ds, ss)
 
-    cards = '\n'.join(card(s, href_for(s), base, main=s.get('main', False))
-                      for s in d['services'])
+    feat = [s for s in d['services'] if s.get('feat')]
+    cards = '\n'.join(card(s, href_for(s), base, main=s.get('main', False)) for s in feat)
+    plist = price_list(d, href_for)
 
     others = '\n'.join(
         '''      <a class="cat" href="../%s/">
@@ -335,9 +378,10 @@ def build_dir_page(d):
       <p class="pagehead__lead">%(intro)s</p>
     </header>
 
-    <div class="cards">
+    <div class="cards cards--%(ncards)d">
 %(cards)s
     </div>
+%(plist)s
   </div>
 </section>
 
@@ -355,7 +399,11 @@ def build_dir_page(d):
 ''' % {
         'crumbs': crumbs([('Главная', base), ('Услуги', base + '#services'), (d['title'], None)]),
         'sub': d['sub'], 'title': d['title'], 'intro': d['intro'],
-        'cards': cards, 'others': others,
+        'cards': cards, 'plist': plist, 'others': others,
+        # Сетка сверстана на 4 колонки. Направлений с четырьмя фотокарточками
+        # нет, поэтому число карточек уезжает в класс: иначе ряд из двух
+        # карточек оставляет полэкрана пустым.
+        'ncards': min(len(feat), 4),
     }
 
     ld = '''<script type="application/ld+json">
@@ -583,10 +631,12 @@ def build_gift_page():
 
 # ------------------------------------------------- блок услуг на главной странице
 
+# Лента «С этого чаще всего начинают» на главной. Порядок здесь = порядок на
+# сайте. ЗАМЕНИТЬ, когда салон скажет, с чего к ним реально приходят впервые.
 POPULAR = [
-    'Классический массаж спины', 'Французская талия', 'Буккальный массаж лица',
-    'SPA-программа «Десерт для души»', 'SPA-программа для двоих', 'Кедровая бочка',
-    'SPA-программа «Relax»', 'Массаж для беременных',
+    'Авторский массаж спины или ног', 'Классический массаж спины', 'Буккальный массаж лица',
+    '«Французская талия»', 'SPA-программа «Relax»', 'Кедровая бочка',
+    'SPA для двоих «Маленькое путешествие»', 'SPA-массаж головы',
 ]
 
 TILE = '''      <a class="cat" href="uslugi/%(slug)s/">

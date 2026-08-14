@@ -84,6 +84,19 @@ def main():
             if not os.path.exists(os.path.normpath(os.path.join(ROOT, folder, u))):
                 bad(page, 'нет файла %s' % u)
 
+        # Ссылки внутри сайта. Проверка добавлена после того, как удалённая
+        # услуга осталась висеть ссылкой в подвале на всех страницах: сборка
+        # перезаписывает страницы, но не знает, что раньше вело в никуда.
+        for m in re.finditer(r'href="([^"#?][^"]*)"', html):
+            u = m.group(1)
+            if u.startswith(('http', 'mailto:', 'tel:', 'data:', '//')):
+                continue
+            target = os.path.normpath(os.path.join(ROOT, folder, u.split('#')[0]))
+            if os.path.isdir(target):
+                target = os.path.join(target, 'index.html')
+            if not os.path.exists(target):
+                bad(page, 'ссылка в никуда: %s' % u)
+
         # Картинки: alt обязателен, отложенная загрузка — всем, кроме первого экрана
         for tag in re.findall(r'<img\b[^>]*>', html):
             if not re.search(r'\balt="[^"]', tag) and 'id="lbImg"' not in tag:
