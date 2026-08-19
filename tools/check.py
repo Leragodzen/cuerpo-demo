@@ -117,10 +117,15 @@ def main():
         else:
             descs.setdefault(d.group(1), []).append(page)
 
-        # og-теги
-        for prop in ('og:title', 'og:description', 'og:image', 'og:url'):
-            if 'property="%s"' % prop not in html:
-                bad(page, 'нет мета-тега %s' % prop)
+        # og-теги. Служебные страницы (noindex, nofollow) их не требуют: они
+        # закрыты от поисковиков и не рассчитаны на пересылку ссылкой, а
+        # og:image заставил бы придумывать им обложку. Публичные страницы демо
+        # стоят как noindex, follow — их проверка по-прежнему касается.
+        sluzhebnaya = 'content="noindex, nofollow"' in html
+        if not sluzhebnaya:
+            for prop in ('og:title', 'og:description', 'og:image', 'og:url'):
+                if 'property="%s"' % prop not in html:
+                    bad(page, 'нет мета-тега %s' % prop)
 
         # Кнопки записи: только ссылки, адрес ставит app.js из одной константы
         for tag in re.findall(r'<\w+\b[^>]*\bdata-book\b[^>]*>', html):

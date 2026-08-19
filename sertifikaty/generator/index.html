@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Генератор подарочных сертификатов Cuerpo — служебная страница</title>
+<meta name="description" content="Служебный инструмент салона Cuerpo: заполнить поля и скачать готовый файл подарочного сертификата. Страница закрыта от поисковиков и не связана ссылками с сайтом.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F7F2E9;--bg-3:#FCFAF5;--ink:#241F19;--ink-2:#6B6153;--ink-3:#948A7A;
+      --line:rgba(36,31,25,.14);--green:#5F7A50;--green-d:#283321;--sand:#D3B99A}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.6 'Jost',system-ui,sans-serif}
+.wrap{max-width:1140px;margin:0 auto;padding:32px 20px 64px}
+h1{font:400 30px/1.2 'Cormorant Garamond',Georgia,serif;margin:0 0 6px}
+.sub{color:var(--ink-2);font-size:14px;margin:0 0 28px;max-width:64ch}
+.cols{display:grid;gap:28px;grid-template-columns:1fr}
+@media(min-width:900px){.cols{grid-template-columns:380px 1fr;align-items:start}}
+.card{background:var(--bg-3);border:1px solid var(--line);border-radius:16px;padding:20px}
+label{display:block;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin:16px 0 6px}
+label:first-of-type{margin-top:0}
+input,select{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:9px;
+             background:#fff;font:400 16px 'Jost',sans-serif;color:var(--ink)}
+input:focus,select:focus{outline:2px solid var(--green);outline-offset:1px}
+.seg{display:flex;gap:8px;margin-bottom:4px}
+.seg button{flex:1;padding:10px;border:1px solid var(--line);border-radius:9px;background:#fff;
+            font:400 14px 'Jost',sans-serif;color:var(--ink-2);cursor:pointer}
+.seg button.on{background:var(--green-d);border-color:var(--green-d);color:#F5EEE1}
+.row{display:flex;gap:10px}
+.row>div{flex:1}
+.hints{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.hints button{padding:7px 12px;border:1px solid var(--line);border-radius:999px;background:#fff;
+              font:400 13px 'Jost',sans-serif;color:var(--ink-2);cursor:pointer}
+.hints button:hover{border-color:var(--green)}
+.go{display:block;width:100%;margin-top:22px;padding:15px;border:0;border-radius:11px;
+    background:var(--green);color:#fff;font:500 15px 'Jost',sans-serif;letter-spacing:.05em;cursor:pointer}
+.go:hover{background:var(--green-d)}
+.note{font-size:13px;color:var(--ink-3);margin-top:12px;line-height:1.5}
+canvas{width:100%;max-width:520px;height:auto;display:block;margin:0 auto;
+       border:1px solid var(--line);border-radius:8px;background:#fff}
+.back{display:inline-block;margin-top:26px;color:var(--ink-2);font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Генератор подарочных сертификатов</h1>
+<p class="sub">Служебная страница салона: её нет в меню сайта и её не видят поисковики. Заполните поля, проверьте вид справа и нажмите «Скачать». Файл сразу можно отправить гостю в мессенджере или распечатать на A5.</p>
+
+<div class="cols">
+  <div class="card">
+    <label>Что дарим</label>
+    <div class="seg">
+      <button type="button" id="mSum" class="on">Сумму</button>
+      <button type="button" id="mSvc">Программу</button>
+    </div>
+
+    <div id="paneSum">
+      <label for="sum">Номинал, ₽</label>
+      <input id="sum" type="text" inputmode="numeric" value="5 000" autocomplete="off">
+      <div class="hints">
+        <button type="button" data-h="3000">3 000</button>
+        <button type="button" data-h="5000">5 000</button>
+        <button type="button" data-h="7000">7 000</button>
+        <button type="button" data-h="10000">10 000</button>
+      </div>
+    </div>
+
+    <div id="paneSvc" hidden>
+      <label for="svc">Название программы</label>
+      <input id="svc" type="text" list="svcList" value="SPA для двоих «Девичник»" autocomplete="off">
+      <datalist id="svcList">
+      <option value="Авторский массаж спины или ног"></option>
+      <option value="Авторский комплекс"></option>
+      <option value="Классический массаж спины"></option>
+      <option value="Классический массаж всего тела"></option>
+      <option value="Спортивный массаж"></option>
+      <option value="Испанский массаж всего тела"></option>
+      <option value="Буккальный (скульптурный) массаж лица"></option>
+      <option value="«Моментальное преображение»"></option>
+      <option value="SPA-массаж головы"></option>
+      <option value="Массаж лица и головы"></option>
+      <option value="Омолаживающий массаж лица"></option>
+      <option value="Мужской массаж лица"></option>
+      <option value="Комплекс «Формула красоты»"></option>
+      <option value="«Французская талия»"></option>
+      <option value="Антицеллюлитный массаж проблемных зон"></option>
+      <option value="Антицеллюлитный массаж ног"></option>
+      <option value="«Десерт для души»"></option>
+      <option value="«Relax»"></option>
+      <option value="Массаж всего тела горячими камнями"></option>
+      <option value="«Удовольствие»"></option>
+      <option value="«Великий Зевс»"></option>
+      <option value="SPA-массаж всего тела"></option>
+      <option value="«Маленькое путешествие»"></option>
+      <option value="«Двойной Испанский»"></option>
+      <option value="«Для влюблённых»"></option>
+      <option value="«Love is»"></option>
+      <option value="«Девичник»"></option>
+      <option value="«Вулкан для двоих»"></option>
+      <option value="«Мама и дочка — принцесса»"></option>
+      <option value="Кедровая бочка"></option>
+      <option value="Сауна с эффектом русской бани"></option>
+      <option value="Массаж для беременных"></option>
+      </datalist>
+    </div>
+
+    <label for="num">Номер сертификата из YCLIENTS</label>
+    <input id="num" type="text" value="" placeholder="например, 000147" autocomplete="off">
+
+    <div class="row">
+      <div>
+        <label for="to">Кому</label>
+        <input id="to" type="text" value="" placeholder="можно пусто" autocomplete="off">
+      </div>
+      <div>
+        <label for="from">От кого</label>
+        <input id="from" type="text" value="" placeholder="можно пусто" autocomplete="off">
+      </div>
+    </div>
+
+    <label for="till">Действителен до</label>
+    <input id="till" type="date">
+
+    <button type="button" class="go" id="save">Скачать сертификат</button>
+    <p class="note">Срок подставляется сам — полгода от сегодняшнего дня. Поля «кому» и «от кого» можно оставить пустыми, тогда они просто не появятся на сертификате.</p>
+  </div>
+
+  <div>
+    <canvas id="cv" width="1240" height="1754" aria-label="Предпросмотр подарочного сертификата"></canvas>
+  </div>
+</div>
+
+<a class="back" href="../">← вернуться на страницу сертификатов</a>
+</div>
+
+<script>
+(function(){
+'use strict';
+var W=1240,H=1754,cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+var BG='#F7F2E9',INK='#241F19',INK2='#6B6153',INK3='#948A7A',GREEN='#5F7A50',DARK='#283321',SAND='#D3B99A';
+var MONTHS=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+var mode='sum';
+var $=function(id){return document.getElementById(id);};
+
+function spaced(text,cx,y,size,font,weight,color,track){
+  ctx.font=weight+' '+size+'px "'+font+'"';
+  ctx.fillStyle=color;
+  var ch=text.split(''),w=0,i;
+  for(i=0;i<ch.length;i++){w+=ctx.measureText(ch[i]).width+track;}
+  w-=track;
+  var x=cx-w/2;
+  for(i=0;i<ch.length;i++){
+    ctx.fillText(ch[i],x,y);
+    x+=ctx.measureText(ch[i]).width+track;
+  }
+}
+
+function fit(text,max,size,font,weight){
+  ctx.font=weight+' '+size+'px "'+font+'"';
+  while(size>26&&ctx.measureText(text).width>max){
+    size-=2; ctx.font=weight+' '+size+'px "'+font+'"';
+  }
+  return size;
+}
+
+function money(n){
+  return String(n).replace(/\B(?=(\d{3})+(?!\d))/g,' ');
+}
+
+function till(){
+  var v=$('till').value;
+  if(!v){return '';}
+  var p=v.split('-');
+  return Number(p[2])+' '+MONTHS[Number(p[1])-1]+' '+p[0];
+}
+
+function draw(){
+  ctx.fillStyle=BG; ctx.fillRect(0,0,W,H);
+  ctx.textAlign='left'; ctx.textBaseline='alphabetic';
+
+  ctx.strokeStyle=SAND; ctx.lineWidth=2;
+  ctx.strokeRect(58,58,W-116,H-116);
+  ctx.lineWidth=1; ctx.strokeStyle='rgba(211,185,154,.55)';
+  ctx.strokeRect(74,74,W-148,H-148);
+
+  ctx.textAlign='center';
+  spaced('CUERPO',W/2,238,84,'Cormorant Garamond','400',DARK,14);
+  spaced('МАСТЕРСКАЯ ПО ТЕЛУ',W/2,290,19,'Jost','300',INK3,7);
+
+  ctx.strokeStyle=SAND; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(W/2-90,352); ctx.lineTo(W/2+90,352); ctx.stroke();
+
+  ctx.fillStyle=INK; ctx.font='400 56px "Cormorant Garamond"';
+  ctx.fillText('Подарочный сертификат',W/2,492);
+
+  spaced(mode==='sum'?'НА СУММУ':'НА ПРОГРАММУ',W/2,584,17,'Jost','300',INK3,6);
+
+  if(mode==='sum'){
+    var s=money(($('sum').value||'').replace(/\D/g,''))||'0';
+    ctx.fillStyle=GREEN; ctx.font='500 140px "Cormorant Garamond"';
+    ctx.fillText(s+' ₽',W/2,752);
+  }else{
+    var name=$('svc').value||'';
+    var sz=fit(name,900,72,'Cormorant Garamond','500');
+    ctx.fillStyle=GREEN; ctx.font='500 '+sz+'px "Cormorant Garamond"';
+    ctx.fillText(name,W/2,740);
+  }
+
+  var y=926;
+  var to=$('to').value.trim(), from=$('from').value.trim();
+  if(to){
+    ctx.fillStyle=INK2; ctx.font='300 30px "Jost"';
+    ctx.fillText('Для '+to,W/2,y); y+=48;
+  }
+  if(from){
+    ctx.fillStyle=INK2; ctx.font='300 30px "Jost"';
+    ctx.fillText('от '+from,W/2,y); y+=48;
+  }
+
+  ctx.fillStyle=INK2; ctx.font='300 27px "Jost"';
+  ctx.fillText('Предъявите этот сертификат администратору —',W/2,1146);
+  ctx.fillText('он подберёт удобное время и мастера.',W/2,1188);
+
+  ctx.strokeStyle=SAND; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(W/2-90,1272); ctx.lineTo(W/2+90,1272); ctx.stroke();
+
+  var num=$('num').value.trim();
+  if(num){
+    spaced('СЕРТИФИКАТ № '+num,W/2,1352,20,'Jost','400',INK,4);
+  }
+  var t=till();
+  if(t){
+    ctx.fillStyle=INK3; ctx.font='300 24px "Jost"';
+    ctx.fillText('действителен до '+t,W/2,1398);
+  }
+
+  ctx.fillStyle=INK2; ctx.font='300 24px "Jost"';
+  ctx.fillText('Тольятти, Приморский бульвар, 57',W/2,1522);
+  ctx.fillText('+7 (927) 892-30-13',W/2,1562);
+}
+
+$('mSum').addEventListener('click',function(){
+  mode='sum'; $('mSum').classList.add('on'); $('mSvc').classList.remove('on');
+  $('paneSum').hidden=false; $('paneSvc').hidden=true; draw();
+});
+$('mSvc').addEventListener('click',function(){
+  mode='svc'; $('mSvc').classList.add('on'); $('mSum').classList.remove('on');
+  $('paneSvc').hidden=false; $('paneSum').hidden=true; draw();
+});
+
+Array.prototype.forEach.call(document.querySelectorAll('.hints button'),function(b){
+  b.addEventListener('click',function(){
+    $('sum').value=money(b.getAttribute('data-h')); draw();
+  });
+});
+
+Array.prototype.forEach.call(document.querySelectorAll('input'),function(i){
+  i.addEventListener('input',draw);
+});
+
+$('save').addEventListener('click',function(){
+  cv.toBlob(function(blob){
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    var tag=mode==='sum'?($('sum').value||'').replace(/\D/g,''):'programma';
+    a.download='sertifikat-cuerpo-'+tag+($('num').value?'-'+$('num').value.trim():'')+'.png';
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){URL.revokeObjectURL(a.href); a.remove();},1000);
+  },'image/png');
+});
+
+var d=new Date(); d.setMonth(d.getMonth()+6);
+$('till').value=d.toISOString().slice(0,10);
+
+if(document.fonts&&document.fonts.ready){
+  Promise.all([
+    document.fonts.load('400 84px "Cormorant Garamond"'),
+    document.fonts.load('500 140px "Cormorant Garamond"'),
+    document.fonts.load('300 30px "Jost"'),
+    document.fonts.load('400 20px "Jost"')
+  ]).then(draw).catch(draw);
+  document.fonts.ready.then(draw);
+}else{
+  setTimeout(draw,400);
+}
+draw();
+})();
+</script>
+</body>
+</html>
