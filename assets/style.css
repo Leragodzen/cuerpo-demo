@@ -1101,6 +1101,21 @@ body.menu-open .mobile-menu{transform:none; opacity:1; visibility:visible}
 .rev__date{font-size:11.5px; color:var(--ink-3); letter-spacing:.05em}
 /* Ярлык темы отзыва: 22 карточки подряд читаются как каша, а по ярлыку
    гость находит ровно своё сомнение — «первый раз», «в подарок», «чистота». */
+/* Предпросмотр сертификата в форме заказа. Человек выбирает сумму —
+   и сразу видит на ней тот самый файл, который получит. */
+.buy__prev{margin-top:16px}
+.buy__prevc,.buy__prevp{display:block; width:100%; height:auto; border-radius:10px;
+                        border:1px solid var(--line); background:var(--bg-3)}
+.buy__prevp{max-width:260px; margin:0 auto}
+/* display:block выше перебивает атрибут hidden — возвращаем ему силу,
+   иначе электронный и бумажный показываются оба сразу */
+.buy__prevc[hidden],.buy__prevp[hidden]{display:none}
+.buy__prevnote{margin:10px 0 0; font-size:12px; line-height:1.5; color:var(--ink-3); text-align:center}
+
+.buy__copied{margin:10px 0 0; padding:9px 12px; border-radius:9px; background:var(--green-bg);
+             color:var(--green-d); font-size:12.5px; line-height:1.45; text-align:center}
+.buy__copied[hidden]{display:none}
+
 /* Три шага под кнопкой сертификата. Без них человек нажимает «Оформить»,
    попадает в мессенджер и не понимает, ответят ему или нет и когда. */
 .buy__steps{counter-reset:st; list-style:none; margin:18px 0 0; padding:0; display:grid; gap:12px}

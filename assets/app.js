@@ -46,7 +46,7 @@ var CONFIG = {
      туда, а сумма и тип уедут параметрами. Разметку править не нужно. */
   cert: {
     payUrl: '',
-    chat: 'https://wa.me/79278923013'
+    chat: 'https://t.me/cuerpo_massage'
   }
 };
 
@@ -466,6 +466,7 @@ function setupRail(wrap, rail, prev, next){
 
   var what = 'sum';
   var kind = 'Электронный';
+  var orderText = '';
 
   var MIN = 900;   /* дешевле самой дешёвой услуги сертификат не имеет смысла */
 
@@ -492,9 +493,38 @@ function setupRail(wrap, rail, prev, next){
     return kind + ' сертификат на ' + pretty(sum) + ' ₽';
   }
 
+  /* Предпросмотр: человек видит, что именно получит, до оформления —
+     с той самой суммой или программой, которую сейчас выбрал.
+     Бумажный показываем фотографией: у него другой макет и конверт. */
+  var prevC = $('#buyCert', form);
+  var prevP = $('#buyPaper', form);
+  var prevN = $('#buyPrevNote', form);
+
+  function preview(){
+    if (!prevC || !window.CuerpoCert) return;
+    var paper = kind === 'Бумажный';
+    prevC.hidden = paper;
+    if (prevP) prevP.hidden = !paper;
+    if (prevN) {
+      prevN.textContent = paper
+        ? 'Бумажный сертификат — в фирменном конверте, забрать в салоне'
+        : 'Так выглядит электронный сертификат — номер проставит администратор';
+    }
+    if (paper) return;
+    window.CuerpoCert.draw(prevC, {
+      mode: what === 'svc' ? 'svc' : 'sum',
+      sum:  currentSum(),
+      svc:  what === 'svc' && svcSel.options[svcSel.selectedIndex]
+              ? svcSel.options[svcSel.selectedIndex].value : '',
+      till: window.CuerpoCert.defaultTill()
+    });
+  }
+
   function render(){
     var sum = currentSum();
     totalEl.textContent = sum ? pretty(sum) + ' ₽' : '—';
+
+    preview();
 
     var ok = sum >= MIN;
     goBtn.classList.toggle('is-off', !ok);
@@ -510,8 +540,8 @@ function setupRail(wrap, rail, prev, next){
       /* Строчная только первая буква: toLowerCase() на всей строке ломал
          названия программ — «Французская талия» превращалась во «французскую». */
       var o = order();
-      goBtn.href = CONFIG.cert.chat + '?text='
-                 + encodeURIComponent('Здравствуйте! Хочу ' + o.charAt(0).toLowerCase() + o.slice(1));
+      orderText = 'Здравствуйте! Хочу ' + o.charAt(0).toLowerCase() + o.slice(1);
+      goBtn.href = CONFIG.cert.chat;
     }
   }
 
@@ -553,10 +583,19 @@ function setupRail(wrap, rail, prev, next){
   svcSel.addEventListener('change', render);
   form.addEventListener('submit', function(e){ e.preventDefault(); });
   goBtn.addEventListener('click', function(e){
-    if (goBtn.classList.contains('is-off')) e.preventDefault();
+    if (goBtn.classList.contains('is-off')) { e.preventDefault(); return; }
+    /* Кладём заказ в буфер: в Телеграме останется вставить его одним нажатием,
+       и человеку не придётся вспоминать, что он выбирал. */
+    if (!CONFIG.cert.payUrl && orderText && navigator.clipboard) {
+      navigator.clipboard.writeText(orderText).then(function(){
+        var n = $('#buyCopied', form);
+        if (n) { n.hidden = false; }
+      }, function(){});
+    }
   });
 
   render();
+  if (window.CuerpoCert) window.CuerpoCert.ready(preview);
 })();
 
 /* ---------- Всплывающая плашка с предложением ----------

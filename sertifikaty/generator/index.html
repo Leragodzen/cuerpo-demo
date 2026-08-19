@@ -136,103 +136,24 @@ canvas{width:100%;max-width:640px;height:auto;display:block;margin:0 auto;
 <a class="back" href="../index.html">← вернуться на страницу сертификатов</a>
 </div>
 
+<script src="../../assets/cert.js"></script>
 <script>
 (function(){
 'use strict';
-var W=1600,H=1000,cv=document.getElementById('cv'),ctx=cv.getContext('2d');
-var BG='#F7F2E9',INK='#241F19',INK2='#6B6153',INK3='#948A7A',GREEN='#5F7A50',DARK='#283321',SAND='#D3B99A';
-var MONTHS=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+var cv=document.getElementById('cv');
 var mode='sum';
 var $=function(id){return document.getElementById(id);};
 
-function spaced(text,cx,y,size,font,weight,color,track){
-  ctx.font=weight+' '+size+'px "'+font+'"';
-  ctx.fillStyle=color;
-  var ch=text.split(''),w=0,i;
-  for(i=0;i<ch.length;i++){w+=ctx.measureText(ch[i]).width+track;}
-  w-=track;
-  var x=cx-w/2;
-  for(i=0;i<ch.length;i++){
-    ctx.fillText(ch[i],x,y);
-    x+=ctx.measureText(ch[i]).width+track;
-  }
-}
-
-function fit(text,max,size,font,weight){
-  ctx.font=weight+' '+size+'px "'+font+'"';
-  while(size>26&&ctx.measureText(text).width>max){
-    size-=2; ctx.font=weight+' '+size+'px "'+font+'"';
-  }
-  return size;
-}
-
-function money(n){
-  return String(n).replace(/\B(?=(\d{3})+(?!\d))/g,' ');
-}
-
-function till(){
-  var v=$('till').value;
-  if(!v){return '';}
-  var p=v.split('-');
-  return Number(p[2])+' '+MONTHS[Number(p[1])-1]+' '+p[0];
-}
-
 function draw(){
-  ctx.fillStyle=BG; ctx.fillRect(0,0,W,H);
-  ctx.textAlign='left'; ctx.textBaseline='alphabetic';
-
-  ctx.strokeStyle=SAND; ctx.lineWidth=2;
-  ctx.strokeRect(38,38,W-76,H-76);
-  ctx.lineWidth=1; ctx.strokeStyle='rgba(211,185,154,.55)';
-  ctx.strokeRect(52,52,W-104,H-104);
-
-  ctx.textAlign='center';
-  spaced('CUERPO',W/2,152,58,'Cormorant Garamond','400',DARK,10);
-  spaced('МАСТЕРСКАЯ ПО ТЕЛУ',W/2,190,14,'Jost','300',INK3,5);
-
-  ctx.strokeStyle=SAND; ctx.lineWidth=1;
-  ctx.beginPath(); ctx.moveTo(W/2-70,232); ctx.lineTo(W/2+70,232); ctx.stroke();
-
-  ctx.fillStyle=INK; ctx.font='400 42px "Cormorant Garamond"';
-  ctx.fillText('Подарочный сертификат',W/2,302);
-
-  spaced(mode==='sum'?'НА СУММУ':'НА ПРОГРАММУ',W/2,356,13,'Jost','300',INK3,5);
-
-  if(mode==='sum'){
-    var v=money(($('sum').value||'').replace(/\D/g,''))||'0';
-    ctx.fillStyle=GREEN; ctx.font='500 104px "Cormorant Garamond"';
-    ctx.fillText(v+' ₽',W/2,470);
-  }else{
-    var name=$('svc').value||'';
-    var sz=fit(name,1240,64,'Cormorant Garamond','500');
-    ctx.fillStyle=GREEN; ctx.font='500 '+sz+'px "Cormorant Garamond"';
-    ctx.fillText(name,W/2,462);
-  }
-
-  var y=546;
-  var to=$('to').value.trim(), from=$('from').value.trim();
-  if(to){ ctx.fillStyle=INK2; ctx.font='300 25px "Jost"'; ctx.fillText('Для '+to,W/2,y); y+=38; }
-  if(from){ ctx.fillStyle=INK2; ctx.font='300 25px "Jost"'; ctx.fillText('от '+from,W/2,y); }
-
-  ctx.strokeStyle=SAND; ctx.lineWidth=1;
-  ctx.beginPath(); ctx.moveTo(W/2-70,652); ctx.lineTo(W/2+70,652); ctx.stroke();
-
-  ctx.fillStyle=INK2; ctx.font='300 23px "Jost"';
-  ctx.fillText('Запись на программу по телефону',W/2,708);
-  ctx.fillStyle=GREEN; ctx.font='400 34px "Jost"';
-  ctx.fillText('+7 (927) 892-30-13',W/2,752);
-
-  ctx.fillStyle=INK3; ctx.font='300 20px "Jost"';
-  ctx.fillText('Покажите сертификат администратору в салоне — можно прямо',W/2,806);
-  ctx.fillText('с экрана телефона, до или после сеанса.',W/2,836);
-
-  var num=$('num').value.trim(), t=till(), line=[];
-  if(num){ line.push('СЕРТИФИКАТ № '+num); }
-  if(t){ line.push('ДЕЙСТВИТЕЛЕН ДО '+t.toUpperCase()); }
-  if(line.length){ spaced(line.join('   ·   '),W/2,900,15,'Jost','400',INK,3); }
-
-  ctx.fillStyle=INK3; ctx.font='300 19px "Jost"';
-  ctx.fillText('Тольятти, Приморский бульвар, 57',W/2,936);
+  window.CuerpoCert.draw(cv, {
+    mode: mode,
+    sum:  $('sum').value,
+    svc:  $('svc').value,
+    num:  $('num').value.trim(),
+    to:   $('to').value.trim(),
+    from: $('from').value.trim(),
+    till: $('till').value
+  });
 }
 
 $('mSum').addEventListener('click',function(){
@@ -246,7 +167,7 @@ $('mSvc').addEventListener('click',function(){
 
 Array.prototype.forEach.call(document.querySelectorAll('.hints button'),function(b){
   b.addEventListener('click',function(){
-    $('sum').value=money(b.getAttribute('data-h')); draw();
+    $('sum').value=window.CuerpoCert.money(b.getAttribute('data-h')); draw();
   });
 });
 
@@ -265,21 +186,8 @@ $('save').addEventListener('click',function(){
   },'image/png');
 });
 
-var d=new Date(); d.setMonth(d.getMonth()+6);
-$('till').value=d.toISOString().slice(0,10);
-
-if(document.fonts&&document.fonts.ready){
-  Promise.all([
-    document.fonts.load('400 84px "Cormorant Garamond"'),
-    document.fonts.load('500 140px "Cormorant Garamond"'),
-    document.fonts.load('300 30px "Jost"'),
-    document.fonts.load('400 20px "Jost"')
-  ]).then(draw).catch(draw);
-  document.fonts.ready.then(draw);
-}else{
-  setTimeout(draw,400);
-}
-draw();
+$('till').value=window.CuerpoCert.defaultTill();
+window.CuerpoCert.ready(draw);
 })();
 </script>
 </body>

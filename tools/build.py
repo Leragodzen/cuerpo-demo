@@ -621,6 +621,15 @@ def build_gift_page():
               <button type="button" class="seg__b" data-kind="Бумажный">Бумажный</button>
             </div>
             <p class="buy__hintline" id="buyKindNote">Пришлём на почту письмом</p>
+
+            <div class="buy__prev">
+              <canvas id="buyCert" class="buy__prevc" width="1600" height="1000"
+                      aria-label="Так выглядит электронный подарочный сертификат Cuerpo"></canvas>
+              <img class="buy__prevp" id="buyPaper" hidden loading="lazy" decoding="async"
+                   src="%(base)sassets/img/gift-certificate.webp" width="524" height="700"
+                   alt="Бумажный подарочный сертификат Cuerpo в фирменном конверте">
+              <p class="buy__prevnote" id="buyPrevNote">Так выглядит сертификат — сумма и программа подставятся ваши</p>
+            </div>
           </fieldset>
 
           <div class="buy__total">
@@ -635,11 +644,17 @@ def build_gift_page():
             <li><b>Мы отвечаем.</b> Присылаем реквизиты для оплаты и спрашиваем почту, на которую отправить сертификат.</li>
             <li><b>Сертификат у вас.</b> После оплаты присылаем его письмом на почту и дублируем в переписку. Бумажный в конверте — забираете в салоне.</li>
           </ol>
+          <p class="buy__copied" id="buyCopied" hidden>Текст заказа скопирован — вставьте его в чат и отправьте</p>
           <p class="buy__small">Отвечаем в рабочее время, ежедневно 09:00–21:00</p>
         </form>
       </div>
     </div>
   </div>
+
+  <!-- Общая отрисовка сертификата: тот же файл рисует предпросмотр здесь
+       и готовый файл в служебном генераторе. Обычный тег без defer —
+       так он выполнится раньше отложенного app.js, которому нужен. -->
+  <script src="%(base)sassets/cert.js"></script>
 </section>
 
 <section class="section section--sand">
@@ -762,7 +777,7 @@ def build_home_section():
 
 SOCIALS = [
     'https://vk.ru/cuerpo_massage',
-    'https://t.me/+79278923013',
+    'https://t.me/cuerpo_massage',
     'https://max.ru/join/cS6n7juwoTfDZ0bwwvBSRJ9FdDHrQW_8NSufPw8zTFs',
     'https://yandex.ru/maps/org/cuerpo/8688668194/',
     'https://n908364.yclients.com/',
