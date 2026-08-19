@@ -39,7 +39,7 @@ input:focus,select:focus{outline:2px solid var(--green);outline-offset:1px}
     background:var(--green);color:#fff;font:500 15px 'Jost',sans-serif;letter-spacing:.05em;cursor:pointer}
 .go:hover{background:var(--green-d)}
 .note{font-size:13px;color:var(--ink-3);margin-top:12px;line-height:1.5}
-canvas{width:100%;max-width:520px;height:auto;display:block;margin:0 auto;
+canvas{width:100%;max-width:640px;height:auto;display:block;margin:0 auto;
        border:1px solid var(--line);border-radius:8px;background:#fff}
 .back{display:inline-block;margin-top:26px;color:var(--ink-2);font-size:14px}
 </style>
@@ -129,17 +129,17 @@ canvas{width:100%;max-width:520px;height:auto;display:block;margin:0 auto;
   </div>
 
   <div>
-    <canvas id="cv" width="1240" height="1754" aria-label="Предпросмотр подарочного сертификата"></canvas>
+    <canvas id="cv" width="1600" height="1000" aria-label="Предпросмотр подарочного сертификата"></canvas>
   </div>
 </div>
 
-<a class="back" href="../">← вернуться на страницу сертификатов</a>
+<a class="back" href="../index.html">← вернуться на страницу сертификатов</a>
 </div>
 
 <script>
 (function(){
 'use strict';
-var W=1240,H=1754,cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+var W=1600,H=1000,cv=document.getElementById('cv'),ctx=cv.getContext('2d');
 var BG='#F7F2E9',INK='#241F19',INK2='#6B6153',INK3='#948A7A',GREEN='#5F7A50',DARK='#283321',SAND='#D3B99A';
 var MONTHS=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
 var mode='sum';
@@ -182,64 +182,57 @@ function draw(){
   ctx.textAlign='left'; ctx.textBaseline='alphabetic';
 
   ctx.strokeStyle=SAND; ctx.lineWidth=2;
-  ctx.strokeRect(58,58,W-116,H-116);
+  ctx.strokeRect(38,38,W-76,H-76);
   ctx.lineWidth=1; ctx.strokeStyle='rgba(211,185,154,.55)';
-  ctx.strokeRect(74,74,W-148,H-148);
+  ctx.strokeRect(52,52,W-104,H-104);
 
   ctx.textAlign='center';
-  spaced('CUERPO',W/2,238,84,'Cormorant Garamond','400',DARK,14);
-  spaced('МАСТЕРСКАЯ ПО ТЕЛУ',W/2,290,19,'Jost','300',INK3,7);
+  spaced('CUERPO',W/2,152,58,'Cormorant Garamond','400',DARK,10);
+  spaced('МАСТЕРСКАЯ ПО ТЕЛУ',W/2,190,14,'Jost','300',INK3,5);
 
   ctx.strokeStyle=SAND; ctx.lineWidth=1;
-  ctx.beginPath(); ctx.moveTo(W/2-90,352); ctx.lineTo(W/2+90,352); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(W/2-70,232); ctx.lineTo(W/2+70,232); ctx.stroke();
 
-  ctx.fillStyle=INK; ctx.font='400 56px "Cormorant Garamond"';
-  ctx.fillText('Подарочный сертификат',W/2,492);
+  ctx.fillStyle=INK; ctx.font='400 42px "Cormorant Garamond"';
+  ctx.fillText('Подарочный сертификат',W/2,302);
 
-  spaced(mode==='sum'?'НА СУММУ':'НА ПРОГРАММУ',W/2,584,17,'Jost','300',INK3,6);
+  spaced(mode==='sum'?'НА СУММУ':'НА ПРОГРАММУ',W/2,356,13,'Jost','300',INK3,5);
 
   if(mode==='sum'){
-    var s=money(($('sum').value||'').replace(/\D/g,''))||'0';
-    ctx.fillStyle=GREEN; ctx.font='500 140px "Cormorant Garamond"';
-    ctx.fillText(s+' ₽',W/2,752);
+    var v=money(($('sum').value||'').replace(/\D/g,''))||'0';
+    ctx.fillStyle=GREEN; ctx.font='500 104px "Cormorant Garamond"';
+    ctx.fillText(v+' ₽',W/2,470);
   }else{
     var name=$('svc').value||'';
-    var sz=fit(name,900,72,'Cormorant Garamond','500');
+    var sz=fit(name,1240,64,'Cormorant Garamond','500');
     ctx.fillStyle=GREEN; ctx.font='500 '+sz+'px "Cormorant Garamond"';
-    ctx.fillText(name,W/2,740);
+    ctx.fillText(name,W/2,462);
   }
 
-  var y=926;
+  var y=546;
   var to=$('to').value.trim(), from=$('from').value.trim();
-  if(to){
-    ctx.fillStyle=INK2; ctx.font='300 30px "Jost"';
-    ctx.fillText('Для '+to,W/2,y); y+=48;
-  }
-  if(from){
-    ctx.fillStyle=INK2; ctx.font='300 30px "Jost"';
-    ctx.fillText('от '+from,W/2,y); y+=48;
-  }
-
-  ctx.fillStyle=INK2; ctx.font='300 27px "Jost"';
-  ctx.fillText('Предъявите этот сертификат администратору —',W/2,1146);
-  ctx.fillText('он подберёт удобное время и мастера.',W/2,1188);
+  if(to){ ctx.fillStyle=INK2; ctx.font='300 25px "Jost"'; ctx.fillText('Для '+to,W/2,y); y+=38; }
+  if(from){ ctx.fillStyle=INK2; ctx.font='300 25px "Jost"'; ctx.fillText('от '+from,W/2,y); }
 
   ctx.strokeStyle=SAND; ctx.lineWidth=1;
-  ctx.beginPath(); ctx.moveTo(W/2-90,1272); ctx.lineTo(W/2+90,1272); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(W/2-70,652); ctx.lineTo(W/2+70,652); ctx.stroke();
 
-  var num=$('num').value.trim();
-  if(num){
-    spaced('СЕРТИФИКАТ № '+num,W/2,1352,20,'Jost','400',INK,4);
-  }
-  var t=till();
-  if(t){
-    ctx.fillStyle=INK3; ctx.font='300 24px "Jost"';
-    ctx.fillText('действителен до '+t,W/2,1398);
-  }
+  ctx.fillStyle=INK2; ctx.font='300 23px "Jost"';
+  ctx.fillText('Запись на программу по телефону',W/2,708);
+  ctx.fillStyle=GREEN; ctx.font='400 34px "Jost"';
+  ctx.fillText('+7 (927) 892-30-13',W/2,752);
 
-  ctx.fillStyle=INK2; ctx.font='300 24px "Jost"';
-  ctx.fillText('Тольятти, Приморский бульвар, 57',W/2,1522);
-  ctx.fillText('+7 (927) 892-30-13',W/2,1562);
+  ctx.fillStyle=INK3; ctx.font='300 20px "Jost"';
+  ctx.fillText('Покажите сертификат администратору в салоне — можно прямо',W/2,806);
+  ctx.fillText('с экрана телефона, до или после сеанса.',W/2,836);
+
+  var num=$('num').value.trim(), t=till(), line=[];
+  if(num){ line.push('СЕРТИФИКАТ № '+num); }
+  if(t){ line.push('ДЕЙСТВИТЕЛЕН ДО '+t.toUpperCase()); }
+  if(line.length){ spaced(line.join('   ·   '),W/2,900,15,'Jost','400',INK,3); }
+
+  ctx.fillStyle=INK3; ctx.font='300 19px "Jost"';
+  ctx.fillText('Тольятти, Приморский бульвар, 57',W/2,936);
 }
 
 $('mSum').addEventListener('click',function(){
