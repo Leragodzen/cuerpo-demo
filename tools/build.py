@@ -434,11 +434,6 @@ def build_svc_page(d, s):
           <a class="btn btn--primary btn--full" data-book data-service="%(name)s">Записаться</a>
         </div>
 
-        <p class="svcp__note">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
-          Точную стоимость и свободное время подскажет администратор. Звоните
-          <a href="tel:+79278923013">+7 (927) 892-30-13</a> — ежедневно с 09:00 до 21:00.
-        </p>
       </div>
     </div>
   </div>
@@ -696,7 +691,8 @@ def build_gift_page():
 POPULAR = [
     'Классический массаж спины', 'Авторский массаж спины или ног',
     'SPA-массаж всего тела', 'Испанский массаж всего тела',
-    'Массаж лица и головы', 'SPA для двоих «Двойной Испанский»',
+    'Массаж лица и головы', 'SPA-программа «Удовольствие»',
+    'SPA для двоих «Двойной Испанский»',
 ]
 
 TILE = '''      <a class="cat" href="uslugi/%(slug)s/">
@@ -729,7 +725,7 @@ GIFT_TILE = '''      <a class="giftban" href="sertifikaty/">
           <span class="giftban__sub">На любую услугу мастерской или на свою сумму.<br>В фирменном конверте — или письмом на почту.</span>
           <span class="giftban__row">
             <span class="giftban__btn">Выбрать сертификат %s</span>
-            <span class="giftban__meta">от 900 ₽ · действует 6 месяцев</span>
+            <span class="giftban__meta">любая сумма или программа · действует 6 месяцев</span>
           </span>
         </span>
       </a>''' % ARROW
@@ -737,7 +733,7 @@ GIFT_TILE = '''      <a class="giftban" href="sertifikaty/">
 HOME_TPL = '''    <div class="head head--center reveal">
       <p class="eyebrow eyebrow--center">Услуги и цены</p>
       <h2 class="h2">Каталог массажа и SPA<br>в мастерской Cuerpo</h2>
-      <p class="lead">Выберите направление — внутри цены, длительность и запись в один клик.</p>
+      <p class="lead">Выберите направление — внутри цены, длительность и что входит в сеанс.</p>
     </div>
 
     <div class="cats reveal">
