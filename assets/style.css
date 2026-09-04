@@ -1485,3 +1485,51 @@ body.menu-open .mobile-menu{transform:none; opacity:1; visibility:visible}
 .cats--mini .cat{aspect-ratio:16/10; border-radius:var(--r-m)}
 .cats--mini .cat__ttl{font-size:clamp(16px,3vw,20px)}
 .cats--mini .cat__sub{display:none}
+
+/* ============================================================
+   ПОЛЗУНОК ПРОКРУТКИ
+   ============================================================ */
+/* Системную полосу справа убираем и рисуем свою: тонкая линия, которая
+   заполняется зелёным по мере чтения, и метка-кругляш с фирменной «C» из
+   логотипа. Метку можно тянуть — иначе, спрятав системную полосу, мы бы
+   отобрали у человека привычный способ листать мышью. */
+html{scrollbar-width:none}
+html::-webkit-scrollbar{width:0; height:0}
+
+.sbar{
+  position:fixed; z-index:95; right:8px;
+  top:calc(var(--header-h, 60px) + 18px); bottom:86px;
+  width:24px; pointer-events:none;
+  opacity:0; visibility:hidden; transition:opacity .35s ease, visibility .35s ease;
+}
+.sbar.is-in{opacity:1; visibility:visible}
+/* Пока открыто меню или окно поверх страницы, ползунок не нужен */
+body.menu-open .sbar, body.is-locked .sbar{opacity:0; visibility:hidden}
+
+.sbar__track, .sbar__fill{position:absolute; left:50%; width:1px; margin-left:-.5px; border-radius:1px}
+.sbar__track{top:0; bottom:0; background:var(--line)}
+.sbar__fill{top:0; height:calc(var(--k, 0) * 100%); background:rgba(95,122,80,.5)}
+
+.sbar__grip{
+  position:absolute; left:50%; top:calc(var(--k, 0) * (100% - 24px));
+  width:24px; height:24px; margin-left:-12px;
+  display:flex; align-items:center; justify-content:center;
+  border-radius:50%; border:1px solid rgba(95,122,80,.45);
+  background:var(--bg-3); box-shadow:var(--shadow-s);
+  pointer-events:auto; cursor:grab; touch-action:none;
+  transition:transform .2s ease, box-shadow .2s ease;
+}
+.sbar__grip i{
+  font-family:var(--ff-display); font-style:italic; font-weight:500;
+  font-size:15px; line-height:1; color:var(--green); padding-right:1px;
+}
+.sbar__grip:hover{transform:scale(1.12)}
+.sbar.is-drag .sbar__grip{cursor:grabbing; transform:scale(1.16); box-shadow:var(--shadow-m); transition:none}
+.sbar.is-drag .sbar__fill{transition:none}
+
+@media (min-width:1000px){
+  /* На большом экране по линии можно кликнуть и перескочить — там мышь,
+     промахнуться нечем. На телефоне линия кликов не ловит: край экрана
+     задевают пальцем при обычном пролистывании. */
+  .sbar{right:14px; bottom:28px; pointer-events:auto}
+}

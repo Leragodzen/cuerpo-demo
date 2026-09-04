@@ -662,4 +662,80 @@ document.addEventListener('click', function(e){
   window.scrollTo({ top: t.getBoundingClientRect().top + window.scrollY - offset - 10, behavior:'smooth' });
 });
 
+/* ---------- Свой ползунок прокрутки ---------- */
+/* Системная полоса спрятана в стилях, здесь рисуем свою: линия заполняется
+   по мере чтения, метку с фирменной «C» можно тянуть. Разметку создаём кодом,
+   чтобы она появилась сразу на всех страницах — их собирает build.py. */
+(function(){
+  var bar = document.createElement('div');
+  bar.className = 'sbar';
+  bar.setAttribute('aria-hidden', 'true');   /* дублирует обычную прокрутку */
+  bar.innerHTML = '<span class="sbar__track"></span><span class="sbar__fill"></span>'
+                + '<span class="sbar__grip"><i>C</i></span>';
+  document.body.appendChild(bar);
+
+  var grip = $('.sbar__grip', bar);
+  var dragging = false, queued = false;
+
+  function scrollMax(){
+    return Math.max(document.documentElement.scrollHeight - window.innerHeight, 0);
+  }
+
+  function draw(){
+    queued = false;
+    var max = scrollMax();
+    /* Короткая страница — ползунку нечего показывать */
+    if (max < 200){ bar.classList.remove('is-in'); return; }
+    var s = window.scrollY || document.documentElement.scrollTop;
+    bar.style.setProperty('--k', Math.min(Math.max(s / max, 0), 1));
+    /* Пока виден первый экран, ползунка нет: тонкая линия на тёмном кадре не
+       читается, да и мешала бы фотографии. Порог тот же, что у нижней панели
+       «Записаться», — оба элемента появляются одной группой. */
+    bar.classList.toggle('is-in', dragging || s > mbarThreshold());
+  }
+  function ping(){ if (!queued){ queued = true; requestAnimationFrame(draw); } }
+
+  /* Положение метки → положение страницы. Считаем от центра метки, иначе
+     страница дёргается на половину её высоты в момент захвата. */
+  function scrollToPointer(y, smooth){
+    var r = bar.getBoundingClientRect(), g = grip.offsetHeight || 24;
+    var k = (y - r.top - g / 2) / Math.max(r.height - g, 1);
+    k = Math.min(Math.max(k, 0), 1);
+    window.scrollTo({ top: k * scrollMax(), behavior: smooth && !reduceMotion ? 'smooth' : 'auto' });
+  }
+
+  grip.addEventListener('pointerdown', function(e){
+    dragging = true;
+    bar.classList.add('is-drag');
+    /* У html стоит scroll-behavior:smooth — при перетаскивании страница
+       догоняла бы метку с задержкой. На время захвата выключаем. */
+    document.documentElement.style.scrollBehavior = 'auto';
+    grip.setPointerCapture(e.pointerId);
+    e.preventDefault();
+  });
+  grip.addEventListener('pointermove', function(e){
+    if (dragging) scrollToPointer(e.clientY, false);
+  });
+  function drop(){
+    if (!dragging) return;
+    dragging = false;
+    bar.classList.remove('is-drag');
+    document.documentElement.style.scrollBehavior = '';
+    draw();
+  }
+  grip.addEventListener('pointerup', drop);
+  grip.addEventListener('pointercancel', drop);
+
+  /* Клик по самой линии — перескок к этому месту (только на большом экране,
+     на телефоне у .sbar отключены события указателя) */
+  bar.addEventListener('pointerdown', function(e){
+    if (e.target === grip || grip.contains(e.target)) return;
+    scrollToPointer(e.clientY, true);
+  });
+
+  window.addEventListener('scroll', ping, { passive: true });
+  window.addEventListener('resize', ping);
+  ping();
+})();
+
 })();
