@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /sertifikaty/generator/
+
+Sitemap: https://cuerpomassage.ru/sitemap.xml

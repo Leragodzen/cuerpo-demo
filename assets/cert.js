@@ -8,14 +8,20 @@
 
    Формат — карточка 1600×1000, пропорции близки к банковской.
    Рисуем крупно и уменьшаем на экране: так файл годится и для
-   пересылки в мессенджере, и для печати.
+   пересылки в мессенджере, и для печати на A5.
+
+   Композиция намеренно несимметричная: марка и текст прижаты
+   влево, справа уходит за край монограмма, поверх всего идут
+   тонкие дуги. Прошлая версия была центрирована и в рамке —
+   это читалось как бланк, а не как подарок.
    ============================================================ */
 window.CuerpoCert = (function(){
 'use strict';
 
 var W = 1600, H = 1000;
-var BG='#F7F2E9', INK='#241F19', INK2='#6B6153', INK3='#948A7A',
-    GREEN='#5F7A50', DARK='#283321', SAND='#D3B99A';
+var PAPER='#FDFBF7', INK='#241F19', INK2='#6B6153', INK3='#9B9181',
+    GREEN='#5F7A50', DARK='#283321', SAND='#C9B08C';
+var PAD = 104;                       /* левое поле, от него живёт весь текст */
 var MONTHS = ['января','февраля','марта','апреля','мая','июня',
               'июля','августа','сентября','октября','ноября','декабря'];
 
@@ -28,50 +34,88 @@ function dateRu(iso){
   return Number(p[2]) + ' ' + MONTHS[Number(p[1]) - 1] + ' ' + p[0];
 }
 
-/* Срок по умолчанию — полгода от сегодняшнего дня */
+/* Срок по умолчанию — три месяца от сегодняшнего дня.
+   setMonth сам переносит год и подтягивает 31-е число к концу
+   короткого месяца, поэтому отдельной проверки не нужно. */
 function defaultTill(){
   var d = new Date();
-  d.setMonth(d.getMonth() + 6);
+  d.setMonth(d.getMonth() + 3);
   return d.getFullYear() + '-' + ('0'+(d.getMonth()+1)).slice(-2) + '-' + ('0'+d.getDate()).slice(-2);
 }
 
 /* Разрядка вручную: ctx.letterSpacing поддерживают не все браузеры,
    а капитель с плотными буквами выглядит дёшево. */
-function spaced(ctx, text, cx, y, size, font, weight, color, track){
-  ctx.font = weight + ' ' + size + 'px "' + font + '"';
+function tracked(ctx, text, x, y, size, weight, color, track){
+  ctx.font = weight + ' ' + size + 'px "Jost"';
   ctx.fillStyle = color;
-  var ch = text.split(''), w = 0, i;
-  for(i = 0; i < ch.length; i++){ w += ctx.measureText(ch[i]).width + track; }
-  w -= track;
-  var x = cx - w / 2;
+  var ch = text.split(''), i;
   for(i = 0; i < ch.length; i++){
     ctx.fillText(ch[i], x, y);
     x += ctx.measureText(ch[i]).width + track;
   }
+  return x - track;
 }
 
-function fit(ctx, text, max, size, font, weight){
-  ctx.font = weight + ' ' + size + 'px "' + font + '"';
-  while(size > 26 && ctx.measureText(text).width > max){
-    size -= 2;
-    ctx.font = weight + ' ' + size + 'px "' + font + '"';
+/* Название программы бывает длинным («SPA-программа „Двойной Испанский“»).
+   Сначала пробуем уменьшить кегль, и только если не помогло — переносим:
+   две строки крупно читаются лучше, чем одна мелко. */
+function wrap(ctx, text, max, size, weight){
+  ctx.font = weight + ' ' + size + 'px "Cormorant Garamond"';
+  if(ctx.measureText(text).width <= max){ return {size:size, lines:[text]}; }
+
+  while(size > 52 && ctx.measureText(text).width > max){
+    size -= 3;
+    ctx.font = weight + ' ' + size + 'px "Cormorant Garamond"';
   }
-  return size;
+  if(ctx.measureText(text).width <= max){ return {size:size, lines:[text]}; }
+
+  var words = text.split(' '), lines = [], cur = '';
+  words.forEach(function(w){
+    var test = cur ? cur + ' ' + w : w;
+    if(ctx.measureText(test).width > max && cur){ lines.push(cur); cur = w; }
+    else { cur = test; }
+  });
+  if(cur){ lines.push(cur); }
+  return {size:size, lines:lines.slice(0, 2)};
 }
 
-/* Уголковые засечки на рамке: сплошная двойная рамка выглядит как бланк,
-   а разомкнутые уголки — как приглашение. */
-function corners(ctx, x, y, w, h, len){
+/* Монограмма уходит за правый нижний угол. Обрезанная буква выглядит
+   как знак на бумаге, а вписанная целиком — как водяной знак на справке. */
+function monogram(ctx){
+  ctx.save();
+  ctx.globalAlpha = 0.62;
+  ctx.fillStyle = SAND;
+  ctx.textAlign = 'left';
+  ctx.font = 'italic 500 620px "Cormorant Garamond"';
+  ctx.fillText('C', 1140, 1120);
+  ctx.restore();
+}
+
+/* Три дуги: две расходятся в правом верхнем углу, одна проходит
+   низом под всем текстом. Держатся подальше от левой колонки —
+   там живут сумма и подписи. */
+function arcs(ctx){
+  ctx.save();
   ctx.strokeStyle = SAND;
-  ctx.lineWidth = 2;
-  var pts = [[x, y, 1, 1], [x + w, y, -1, 1], [x, y + h, 1, -1], [x + w, y + h, -1, -1]];
-  pts.forEach(function(p){
-    ctx.beginPath();
-    ctx.moveTo(p[0] + p[2] * len, p[1]);
-    ctx.lineTo(p[0], p[1]);
-    ctx.lineTo(p[0], p[1] + p[3] * len);
-    ctx.stroke();
-  });
+  ctx.lineWidth = 3;
+  ctx.lineCap = 'round';
+
+  ctx.beginPath();
+  ctx.moveTo(600, -40);
+  ctx.bezierCurveTo(900, 200, 1180, 300, 1660, 300);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(980, -40);
+  ctx.bezierCurveTo(1120, 260, 1340, 520, 1660, 690);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(-40, 1030);
+  ctx.bezierCurveTo(500, 985, 1100, 1010, 1660, 700);
+  ctx.stroke();
+
+  ctx.restore();
 }
 
 /* data: {mode:'sum'|'svc', sum, svc, num, to, from, till} */
@@ -79,74 +123,73 @@ function draw(cv, data){
   var ctx = cv.getContext('2d');
   cv.width = W; cv.height = H;
 
-  ctx.fillStyle = BG; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = PAPER; ctx.fillRect(0, 0, W, H);
   ctx.textBaseline = 'alphabetic';
+  ctx.textAlign = 'left';
 
-  ctx.lineWidth = 1;
-  ctx.strokeStyle = 'rgba(211,185,154,.5)';
-  ctx.strokeRect(46, 46, W - 92, H - 92);
-  corners(ctx, 32, 32, W - 64, H - 64, 46);
+  monogram(ctx);
+  arcs(ctx);
 
-  /* Монограмма фоном: еле различимая, держит центр композиции */
-  ctx.save();
-  ctx.globalAlpha = 0.045;
-  ctx.textAlign = 'center';
-  ctx.fillStyle = GREEN;
-  ctx.font = '500 520px "Cormorant Garamond"';
-  ctx.fillText('C', W / 2, 700);
-  ctx.restore();
+  /* Марка */
+  ctx.fillStyle = DARK;
+  ctx.font = 'italic 500 66px "Cormorant Garamond"';
+  ctx.fillText('Cuerpo', PAD, 158);
+  tracked(ctx, 'МАСТЕРСКАЯ ПО ТЕЛУ', PAD + 4, 196, 13, '300', INK3, 5);
 
-  ctx.textAlign = 'center';
-  spaced(ctx, 'CUERPO', W / 2, 152, 58, 'Cormorant Garamond', '400', DARK, 10);
-  spaced(ctx, 'МАСТЕРСКАЯ ПО ТЕЛУ', W / 2, 190, 14, 'Jost', '300', INK3, 5);
+  /* Что это за бумага */
+  tracked(ctx, 'ПОДАРОЧНЫЙ СЕРТИФИКАТ', PAD, 336, 16, '400', INK, 6);
 
-  ctx.strokeStyle = SAND; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(W/2 - 70, 232); ctx.lineTo(W/2 + 70, 232); ctx.stroke();
-
-  ctx.fillStyle = INK;
-  ctx.font = '400 42px "Cormorant Garamond"';
-  ctx.fillText('Подарочный сертификат', W / 2, 302);
-
+  /* Главное — номинал или программа */
   var isSum = data.mode !== 'svc';
-  spaced(ctx, isSum ? 'НА СУММУ' : 'НА ПРОГРАММУ', W / 2, 356, 13, 'Jost', '300', INK3, 5);
-
   if(isSum){
     var v = money(String(data.sum || '').replace(/\D/g, '')) || '0';
-    ctx.fillStyle = GREEN;
-    ctx.font = '500 104px "Cormorant Garamond"';
-    ctx.fillText(v + ' ₽', W / 2, 470);
+    ctx.fillStyle = DARK;
+    ctx.font = '500 136px "Cormorant Garamond"';
+    ctx.fillText(v + ' ₽', PAD, 486);
   } else {
-    var name = data.svc || '';
-    var sz = fit(ctx, name, 1240, 64, 'Cormorant Garamond', '500');
-    ctx.fillStyle = GREEN;
-    ctx.font = '500 ' + sz + 'px "Cormorant Garamond"';
-    ctx.fillText(name, W / 2, 462);
+    var r = wrap(ctx, data.svc || '', 880, 82, '500');
+    ctx.fillStyle = DARK;
+    ctx.font = '500 ' + r.size + 'px "Cormorant Garamond"';
+    var ly = r.lines.length > 1 ? 442 : 486;
+    r.lines.forEach(function(ln){
+      ctx.fillText(ln, PAD, ly);
+      ly += r.size + 12;
+    });
   }
 
-  var y = 546;
-  if(data.to){ ctx.fillStyle = INK2; ctx.font = '300 25px "Jost"'; ctx.fillText('Для ' + data.to, W/2, y); y += 38; }
-  if(data.from){ ctx.fillStyle = INK2; ctx.font = '300 25px "Jost"'; ctx.fillText('от ' + data.from, W/2, y); }
+  /* Кому и от кого — одной строкой, чтобы не наращивать этажи */
+  var who = [];
+  if(data.to){ who.push('Для ' + data.to); }
+  if(data.from){ who.push('от ' + data.from); }
+  if(who.length){
+    ctx.fillStyle = INK2;
+    ctx.font = '300 27px "Jost"';
+    ctx.fillText(who.join('   ·   '), PAD, 570);
+  }
 
-  ctx.strokeStyle = SAND; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(W/2 - 70, 652); ctx.lineTo(W/2 + 70, 652); ctx.stroke();
+  /* Что с этим делать */
+  ctx.fillStyle = INK2;
+  ctx.font = '300 23px "Jost"';
+  ctx.fillText('Покажите сертификат администратору — можно прямо с экрана телефона.', PAD, 706);
 
-  ctx.fillStyle = INK2; ctx.font = '300 23px "Jost"';
-  ctx.fillText('Запись на программу по телефону', W / 2, 708);
-  ctx.fillStyle = GREEN; ctx.font = '400 34px "Jost"';
-  ctx.fillText('+7 (927) 892-30-13', W / 2, 752);
+  ctx.fillStyle = INK3;
+  ctx.font = '300 23px "Jost"';
+  ctx.fillText('Запись по телефону', PAD, 782);
+  var lw = ctx.measureText('Запись по телефону ').width;
+  ctx.fillStyle = GREEN;
+  ctx.font = '400 33px "Jost"';
+  ctx.fillText('+7 (927) 892-30-13', PAD + lw, 784);
 
-  ctx.fillStyle = INK3; ctx.font = '300 20px "Jost"';
-  ctx.fillText('Покажите сертификат администратору в салоне — можно прямо', W / 2, 806);
-  ctx.fillText('с экрана телефона, до или после сеанса.', W / 2, 836);
-
-  var line = [];
-  if(data.num){ line.push('СЕРТИФИКАТ № ' + data.num); }
+  /* Номер и срок — то, что проверяет администратор */
+  var meta = [];
+  if(data.num){ meta.push('№ ' + data.num); }
   var t = dateRu(data.till);
-  if(t){ line.push('ДЕЙСТВИТЕЛЕН ДО ' + t.toUpperCase()); }
-  if(line.length){ spaced(ctx, line.join('   ·   '), W/2, 900, 15, 'Jost', '400', INK, 3); }
+  if(t){ meta.push('ДЕЙСТВИТЕЛЕН ДО ' + t.toUpperCase()); }
+  if(meta.length){ tracked(ctx, meta.join('   ·   '), PAD, 892, 15, '400', INK, 3); }
 
-  ctx.fillStyle = INK3; ctx.font = '300 19px "Jost"';
-  ctx.fillText('Тольятти, Приморский бульвар, 57', W / 2, 936);
+  ctx.fillStyle = INK3;
+  ctx.font = '300 20px "Jost"';
+  ctx.fillText('Тольятти, Приморский бульвар, 57', PAD, 936);
 }
 
 /* Шрифты грузятся из Google Fonts: без ожидания canvas успевает
@@ -154,10 +197,10 @@ function draw(cv, data){
 function ready(cb){
   if(!document.fonts || !document.fonts.load){ setTimeout(cb, 400); return; }
   Promise.all([
-    document.fonts.load('400 58px "Cormorant Garamond"'),
-    document.fonts.load('500 104px "Cormorant Garamond"'),
-    document.fonts.load('300 25px "Jost"'),
-    document.fonts.load('400 34px "Jost"')
+    document.fonts.load('italic 500 66px "Cormorant Garamond"'),
+    document.fonts.load('500 136px "Cormorant Garamond"'),
+    document.fonts.load('300 23px "Jost"'),
+    document.fonts.load('400 33px "Jost"')
   ]).then(cb).catch(cb);
   document.fonts.ready.then(cb);
 }

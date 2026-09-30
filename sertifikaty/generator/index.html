@@ -8,7 +8,7 @@
 <meta name="description" content="Служебный инструмент салона Cuerpo: заполнить поля и скачать готовый файл подарочного сертификата. Страница закрыта от поисковиков и не связана ссылками с сайтом.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#F7F2E9;--bg-3:#FCFAF5;--ink:#241F19;--ink-2:#6B6153;--ink-3:#948A7A;
       --line:rgba(36,31,25,.14);--green:#5F7A50;--green-d:#283321;--sand:#D3B99A}
@@ -38,6 +38,9 @@ input:focus,select:focus{outline:2px solid var(--green);outline-offset:1px}
 .go{display:block;width:100%;margin-top:22px;padding:15px;border:0;border-radius:11px;
     background:var(--green);color:#fff;font:500 15px 'Jost',sans-serif;letter-spacing:.05em;cursor:pointer}
 .go:hover{background:var(--green-d)}
+.go--2{margin-top:10px;background:#fff;border:1px solid var(--line);color:var(--ink)}
+.go--2:hover{background:#fff;border-color:var(--green)}
+.go--2.done{border-color:var(--green);color:var(--green)}
 .note{font-size:13px;color:var(--ink-3);margin-top:12px;line-height:1.5}
 canvas{width:100%;max-width:640px;height:auto;display:block;margin:0 auto;
        border:1px solid var(--line);border-radius:8px;background:#fff}
@@ -65,6 +68,7 @@ canvas{width:100%;max-width:640px;height:auto;display:block;margin:0 auto;
         <button type="button" data-h="5000">5 000</button>
         <button type="button" data-h="7000">7 000</button>
         <button type="button" data-h="10000">10 000</button>
+        <button type="button" data-h="15000">15 000</button>
       </div>
     </div>
 
@@ -125,7 +129,8 @@ canvas{width:100%;max-width:640px;height:auto;display:block;margin:0 auto;
     <input id="till" type="date">
 
     <button type="button" class="go" id="save">Скачать сертификат</button>
-    <p class="note">Срок подставляется сам — полгода от сегодняшнего дня. Поля «кому» и «от кого» можно оставить пустыми, тогда они просто не появятся на сертификате.</p>
+    <button type="button" class="go go--2" id="copy">Скопировать сообщение гостю</button>
+    <p class="note">Срок подставляется сам — три месяца от сегодняшнего дня. Поля «кому» и «от кого» можно оставить пустыми, тогда они просто не появятся на сертификате.</p>
   </div>
 
   <div>
@@ -184,6 +189,33 @@ $('save').addEventListener('click',function(){
     document.body.appendChild(a); a.click();
     setTimeout(function(){URL.revokeObjectURL(a.href); a.remove();},1000);
   },'image/png');
+});
+
+/* Готовое сообщение гостю: администратору остаётся вставить его
+   в чат и приложить скачанный файл — набирать руками нечего. */
+$('copy').addEventListener('click',function(){
+  var what = mode==='sum'
+    ? 'на ' + window.CuerpoCert.money(($('sum').value||'').replace(/\D/g,'')) + ' \u20BD'
+    : 'на программу «' + $('svc').value + '»';
+  var t = ['Здравствуйте! Ваш подарочный сертификат Cuerpo ' + what + '.'];
+  if($('num').value.trim()){ t.push('Номер сертификата: ' + $('num').value.trim() + '.'); }
+  var till = window.CuerpoCert.dateRu($('till').value);
+  if(till){ t.push('Действителен до ' + till + '.'); }
+  t.push('Запись по телефону +7 (927) 892-30-13 или в ответ на это сообщение.');
+  t.push('Тольятти, Приморский бульвар, 57.');
+
+  var text = t.join(' ');
+  var btn = $('copy');
+  function ok(){
+    btn.textContent = 'Скопировано — вставьте в чат';
+    btn.classList.add('done');
+    setTimeout(function(){ btn.textContent='Скопировать сообщение гостю'; btn.classList.remove('done'); }, 2500);
+  }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(ok, function(){ window.prompt('Скопируйте текст:', text); });
+  } else {
+    window.prompt('Скопируйте текст:', text);
+  }
 });
 
 $('till').value=window.CuerpoCert.defaultTill();
