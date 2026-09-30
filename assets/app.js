@@ -46,7 +46,19 @@ var CONFIG = {
      туда, а сумма и тип уедут параметрами. Разметку править не нужно. */
   cert: {
     payUrl: '',
-    chat: 'https://t.me/cuerpo_massage'
+
+    /* Куда можно отправить заказ. Пустая строка — кнопки на сайте нет.
+
+       В WhatsApp текст заказа подставляется прямо в сообщение: остаётся
+       нажать «отправить». Telegram и MAX так не умеют — туда текст уходит
+       через буфер обмена, и человек вставляет его одним нажатием.
+
+       MAX пока пуст: ссылка-приглашение салона протухла (max.ru отвечает
+       «сюда можно попасть только по пригласительной ссылке»). Появится
+       свежая — впишите её сюда, и кнопка вернётся сама. */
+    wa:   '79278923013',
+    chat: 'https://t.me/cuerpo_massage',
+    max:  ''
   }
 };
 
@@ -493,6 +505,36 @@ function setupRail(wrap, rail, prev, next){
     return kind + ' сертификат на ' + pretty(sum) + ' ₽';
   }
 
+  /* Блок «куда отправить заказ» — раскрывается по нажатию «Оформить» */
+  var sendBox = $('#buySend', form);
+  var orderEl = $('#buyOrder', form);
+  var wayWA   = $('#sendWA', form);
+  var wayTG   = $('#sendTG', form);
+  var wayMAX  = $('#sendMAX', form);
+  var wayTel  = $('#sendTel', form);
+
+  if (wayTel) { wayTel.href = 'tel:' + CONFIG.phoneRaw; }
+
+  function fillSend(){
+    if (!sendBox) { return; }
+    if (orderEl) { orderEl.textContent = orderText; }
+
+    var c = CONFIG.cert || {};
+    /* WhatsApp единственный подставляет текст прямо в поле сообщения */
+    if (wayWA) {
+      wayWA.hidden = !c.wa;
+      if (c.wa) { wayWA.href = 'https://wa.me/' + c.wa + '?text=' + encodeURIComponent(orderText); }
+    }
+    if (wayTG) {
+      wayTG.hidden = !c.chat;
+      if (c.chat) { wayTG.href = c.chat; }
+    }
+    if (wayMAX) {
+      wayMAX.hidden = !c.max;
+      if (c.max) { wayMAX.href = c.max; }
+    }
+  }
+
   /* Предпросмотр: человек видит, что именно получит, до оформления —
      с той самой суммой или программой, которую сейчас выбрал.
      Бумажный показываем фотографией: у него другой макет и конверт. */
@@ -550,21 +592,15 @@ function setupRail(wrap, rail, prev, next){
 
     var ok = sum >= MIN;
     goBtn.classList.toggle('is-off', !ok);
-    goBtn.setAttribute('aria-disabled', ok ? 'false' : 'true');
+    goBtn.disabled = !ok;
 
-    var pay = CONFIG.cert && CONFIG.cert.payUrl;
-    if (!ok) {
-      goBtn.removeAttribute('href');
-    } else if (pay) {
-      goBtn.href = pay + (pay.indexOf('?') < 0 ? '?' : '&')
-                 + 'sum=' + sum + '&kind=' + encodeURIComponent(kind);
-    } else {
-      /* Строчная только первая буква: toLowerCase() на всей строке ломал
-         названия программ — «Французская талия» превращалась во «французскую». */
-      var o = order();
-      orderText = 'Здравствуйте! Хочу ' + o.charAt(0).toLowerCase() + o.slice(1);
-      goBtn.href = CONFIG.cert.chat;
-    }
+    /* Строчная только первая буква: toLowerCase() на всей строке ломал
+       названия программ — «Французская талия» превращалась во «французскую». */
+    var o = order();
+    orderText = 'Здравствуйте! Хочу ' + o.charAt(0).toLowerCase() + o.slice(1);
+
+    /* Поменяли сумму при открытом блоке — ссылки и текст едут следом */
+    if (sendBox && !sendBox.hidden) { fillSend(); }
   }
 
   /* Переключатели «Сумму / Программу» и «Электронный / Бумажный» */
@@ -607,8 +643,12 @@ function setupRail(wrap, rail, prev, next){
     if (!n) { return; }
     n.textContent = copied
       ? 'Текст заказа скопирован — вставьте его в чат и отправьте'
-      : 'Скопируйте текст заказа и отправьте его в чат: ' + orderText;
+      : 'Скопируйте текст заказа выше и отправьте его в чат';
     n.hidden = false;
+    /* В WhatsApp текст и так уедет в сообщение — подпись про буфер там лишняя */
+    var tg = $('#sendTGnote', form);
+    if (tg) { tg.textContent = copied ? 'текст скопирован — вставьте в чат'
+                                      : 'скопируйте текст заказа выше'; }
   }
 
   function copyOrder(text){
@@ -639,19 +679,25 @@ function setupRail(wrap, rail, prev, next){
 
   svcSel.addEventListener('change', render);
   form.addEventListener('submit', function(e){ e.preventDefault(); });
-  goBtn.addEventListener('click', function(e){
-    if (goBtn.classList.contains('is-off')) { e.preventDefault(); return; }
-    /* Кладём заказ в буфер: в мессенджере останется вставить его одним
-       нажатием, и человеку не придётся вспоминать, что он выбирал.
 
-       navigator.clipboard существует только на защищённом соединении. Пока
-       сайт открывается по http, его просто нет — заказ молча не копировался,
-       и человек попадал в переписку с пустым полем. Поэтому запасной путь
-       через скрытое поле и execCommand, а если не вышло и он — показываем
-       текст заказа прямо на странице, чтобы его можно было выделить руками. */
-    if (!CONFIG.cert.payUrl && orderText) {
-      copyOrder(orderText);
+  /* «Оформить» раскрывает список способов связи и заодно кладёт заказ в
+     буфер. Раньше кнопка сразу уводила в мессенджер — человек оказывался
+     в чужой переписке, не поняв, что произошло, и с пустым полем ввода. */
+  goBtn.addEventListener('click', function(){
+    if (goBtn.classList.contains('is-off')) { return; }
+
+    var pay = CONFIG.cert && CONFIG.cert.payUrl;
+    if (pay) {
+      window.open(pay + (pay.indexOf('?') < 0 ? '?' : '&')
+                  + 'sum=' + currentSum() + '&kind=' + encodeURIComponent(kind),
+                  '_blank', 'noopener');
+      return;
     }
+
+    sendBox.hidden = false;
+    fillSend();
+    copyOrder(orderText);
+    sendBox.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   });
 
   render();
@@ -721,6 +767,44 @@ document.addEventListener('click', function(e){
   var offset = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 68;
   window.scrollTo({ top: t.getBoundingClientRect().top + window.scrollY - offset - 10, behavior:'smooth' });
 });
+
+/* ---------- Строка про обработку данных ---------- */
+/* На сайте работает Метрика, значит cookie и IP собираются. Закон ждёт, что
+   согласие будет действием, а не молчанием, — поэтому строка с кнопкой.
+   Нарочно одна строка и мелким: большая карточка перекрывала кнопку записи
+   и раздражала. Нажали «Хорошо» — больше не показываем, отметка живёт в
+   localStorage этого браузера. Разметку создаём кодом, чтобы строка сразу
+   появилась на всех страницах, которые собирает build.py.
+
+   Адрес политики берём из ссылки в подвале: сборка сама подставляет там
+   правильный путь для нужной глубины страницы. */
+(function(){
+  var KEY = 'cuerpo-cookie-ok';
+  var seen = false;
+  try { seen = localStorage.getItem(KEY) === '1'; } catch(e){}
+  if (seen) { return; }
+
+  var link = $('#lnkPolicy');
+  var href = link ? link.getAttribute('href') : '/politika/';
+
+  var box = document.createElement('div');
+  box.className = 'ctip';
+  box.setAttribute('role', 'note');
+  box.innerHTML = '<p>Пользуясь сайтом, вы соглашаетесь с '
+                + '<a href="' + href + '">обработкой данных</a>.</p>'
+                + '<button type="button">Хорошо</button>';
+  document.body.appendChild(box);
+
+  /* Небольшая задержка: строка, выехавшая одновременно с первым экраном,
+     воспринимается как часть сайта и её не читают. */
+  setTimeout(function(){ box.classList.add('is-in'); }, 1200);
+
+  $('button', box).addEventListener('click', function(){
+    box.classList.remove('is-in');
+    try { localStorage.setItem(KEY, '1'); } catch(e){}
+    setTimeout(function(){ box.remove(); }, 450);
+  });
+})();
 
 /* ---------- Свой ползунок прокрутки ---------- */
 /* Системная полоса спрятана в стилях, здесь рисуем свою: линия заполняется
