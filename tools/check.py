@@ -91,7 +91,11 @@ def main():
             u = m.group(1)
             if u.startswith(('http', 'mailto:', 'tel:', 'data:', '//')):
                 continue
-            target = os.path.normpath(os.path.join(ROOT, folder, u.split('#')[0]))
+            # У стилей и скриптов в адресе стоит ?v=отпечаток — он нужен
+            # браузеру, чтобы не показывать старую версию из кэша, а файл
+            # на диске, понятно, лежит без него.
+            target = os.path.normpath(
+                os.path.join(ROOT, folder, u.split('#')[0].split('?')[0]))
             if os.path.isdir(target):
                 target = os.path.join(target, 'index.html')
             if not os.path.exists(target):

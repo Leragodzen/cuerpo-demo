@@ -27,7 +27,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/style.css?v=149b872c">
 
 <!-- ============================================================
      ЯНДЕКС.МЕТРИКА
@@ -125,7 +125,7 @@ if (window.CUERPO_METRIKA){
         <!-- ============================================================
              БЛОК ПОКУПКИ
              Считает итог и собирает заказ. Куда ведёт кнопка «Оформить» —
-             задаётся в CONFIG.cert в assets/app.js: пока мессенджер,
+             задаётся в CONFIG.cert в assets/app.js?v=2c860c13: пока мессенджер,
              появится онлайн-касса — там же меняется на ссылку оплаты.
              ============================================================ -->
         <form class="buy" id="buy" novalidate>
@@ -232,7 +232,7 @@ if (window.CUERPO_METRIKA){
                выбрал сумму, и три кнопки внизу только мешают выбирать.
                Текст заказа к этому моменту уже собран и скопирован —
                в мессенджере остаётся вставить его одним нажатием.
-               Способы задаются в CONFIG.cert в assets/app.js: чего там
+               Способы задаются в CONFIG.cert в assets/app.js?v=2c860c13: чего там
                нет, того нет и на странице.
                ============================================================ -->
           <div class="send" id="buySend" hidden>
@@ -273,7 +273,7 @@ if (window.CUERPO_METRIKA){
   <!-- Общая отрисовка сертификата: тот же файл рисует предпросмотр здесь
        и готовый файл в служебном генераторе. Обычный тег без defer —
        так он выполнится раньше отложенного app.js, которому нужен. -->
-  <script src="../assets/cert.js"></script>
+  <script src="../assets/cert.js?v=bef738b9"></script>
 </section>
 
 <section class="section section--sand">
@@ -398,6 +398,6 @@ if (window.CUERPO_METRIKA){
 {"@type":"ListItem","position":1,"name":"Главная","item":"https://cuerpomassage.ru/"},
 {"@type":"ListItem","position":2,"name":"Подарочный сертификат","item":"https://cuerpomassage.ru/sertifikaty/"}]}
 </script>
-<script src="../assets/app.js" defer></script>
+<script src="../assets/app.js?v=2c860c13" defer></script>
 </body>
 </html>

@@ -16,6 +16,7 @@
 Запуск из корня проекта:  python3 tools/build.py
 """
 
+import hashlib
 import io
 import os
 import re
@@ -1171,6 +1172,41 @@ def fix_links_everywhere():
     return 'ссылки → index.html (%d файлов)' % touched
 
 
+# ------------------------------------------------- отметка версии у стилей и скриптов
+
+# Браузер держит style.css и app.js в кэше и после выкладки какое-то время
+# показывает старые. Человек открывает сайт и не видит правку — а она уже
+# там. Поэтому к адресу каждого файла дописываем отпечаток его содержимого:
+# поменялся файл — поменялся адрес — браузер обязан скачать заново.
+# Не поменялся — адрес прежний, и кэш работает как работал.
+ASSETS_RE = re.compile(r'(assets/(?:style\.css|app\.js|cert\.js))(\?v=[0-9a-f]+)?')
+
+
+def stamp_assets():
+    """Дописывает ?v=отпечаток к стилям и скриптам на всех страницах."""
+    marks = {}
+    for name in ('assets/style.css', 'assets/app.js', 'assets/cert.js'):
+        data = io.open(os.path.join(ROOT, name), 'rb').read()
+        marks[name] = hashlib.md5(data).hexdigest()[:8]
+
+    def repl(m):
+        return m.group(1) + '?v=' + marks[m.group(1)]
+
+    touched = 0
+    for base, dirs, files in os.walk(ROOT):
+        dirs[:] = [x for x in dirs if x not in ('.git', '_drafts', '_upload', 'tools', '.claude')]
+        for fn in files:
+            if not fn.endswith('.html'):
+                continue
+            path = os.path.join(base, fn)
+            html = io.open(path, encoding='utf-8').read()
+            fixed = ASSETS_RE.sub(repl, html)
+            if fixed != html:
+                io.open(path, 'w', encoding='utf-8').write(fixed)
+                touched += 1
+    return 'отметка версии у стилей и скриптов (%d файлов)' % touched
+
+
 # ----------------------------------------------------------------------- сборка
 
 def main():
@@ -1184,6 +1220,7 @@ def main():
     made.append(build_404())
     made.append(patch_index())
     made.append(fix_links_everywhere())
+    made.append(stamp_assets())
 
     urls = [''] + ['uslugi/%s/' % d['slug'] for d in DIRS] \
                 + ['uslugi/%s/%s/' % (HOME[s['name']][0], s['slug']) for _, s in ALL] \
