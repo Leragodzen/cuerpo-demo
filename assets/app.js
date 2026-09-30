@@ -662,6 +662,43 @@ document.addEventListener('click', function(e){
   window.scrollTo({ top: t.getBoundingClientRect().top + window.scrollY - offset - 10, behavior:'smooth' });
 });
 
+/* ---------- Плашка про cookie ---------- */
+/* На сайте работает Метрика, значит cookie и IP собираются, и посетителя
+   об этом надо предупредить. Показываем один раз: отметка о согласии живёт
+   в localStorage этого браузера. Разметку создаём кодом — так плашка сразу
+   на всех страницах, которые собирает build.py.
+
+   Адрес политики берём из ссылки в подвале: сборка сама подставляет там
+   правильный путь для нужной глубины страницы. */
+(function(){
+  var KEY = 'cuerpo-cookie-ok';
+  var seen = false;
+  try { seen = localStorage.getItem(KEY) === '1'; } catch(e){}
+  if (seen) { return; }
+
+  var link = $('#lnkPolicy');
+  var href = link ? link.getAttribute('href') : '/politika/';
+
+  var box = document.createElement('div');
+  box.className = 'ctip';
+  box.setAttribute('role', 'note');
+  box.innerHTML = '<p>Мы собираем обезличенную статистику посещений, чтобы понимать, '
+                + 'какие разделы сайта полезны. Подробнее — в '
+                + '<a href="' + href + '">политике обработки данных</a>.</p>'
+                + '<button type="button">Хорошо</button>';
+  document.body.appendChild(box);
+
+  /* Небольшая задержка: плашка, выехавшая одновременно с первым экраном,
+     воспринимается как часть сайта и её не читают. */
+  setTimeout(function(){ box.classList.add('is-in'); }, 1200);
+
+  $('button', box).addEventListener('click', function(){
+    box.classList.remove('is-in');
+    try { localStorage.setItem(KEY, '1'); } catch(e){}
+    setTimeout(function(){ box.remove(); }, 500);
+  });
+})();
+
 /* ---------- Свой ползунок прокрутки ---------- */
 /* Системная полоса спрятана в стилях, здесь рисуем свою: линия заполняется
    по мере чтения, метку с фирменной «C» можно тянуть. Разметку создаём кодом,
