@@ -508,7 +508,7 @@ function setupRail(wrap, rail, prev, next){
     if (prevN) {
       prevN.textContent = paper
         ? 'Бумажный сертификат — в фирменном конверте, забрать в салоне'
-        : 'Так выглядит электронный сертификат — номер проставит администратор';
+        : 'Так выглядит электронный сертификат — нажмите, чтобы рассмотреть';
     }
     if (paper) return;
     window.CuerpoCert.draw(prevC, {
@@ -517,6 +517,28 @@ function setupRail(wrap, rail, prev, next){
       svc:  what === 'svc' && svcSel.options[svcSel.selectedIndex]
               ? svcSel.options[svcSel.selectedIndex].value : '',
       till: window.CuerpoCert.defaultTill()
+    });
+  }
+
+  /* Предпросмотр на телефоне выходит шириной с ладонь, и служебные строки
+     сертификата в нём не прочитать. По нажатию показываем его во весь экран,
+     на узком экране — повёрнутым: карточка горизонтальная, иначе она снова
+     упрётся в ширину телефона и крупнее не станет. */
+  if (prevC) {
+    prevC.addEventListener('click', function(){
+      var ov = document.createElement('div');
+      ov.className = 'certzoom';
+      var img = document.createElement('img');
+      img.src = prevC.toDataURL('image/png');
+      img.alt = 'Подарочный сертификат Cuerpo — крупно';
+      ov.appendChild(img);
+      function close(){ ov.remove(); document.body.classList.remove('is-locked'); }
+      ov.addEventListener('click', close);
+      document.addEventListener('keydown', function esc(e){
+        if (e.key === 'Escape') { close(); document.removeEventListener('keydown', esc); }
+      });
+      document.body.appendChild(ov);
+      document.body.classList.add('is-locked');
     });
   }
 
@@ -580,17 +602,55 @@ function setupRail(wrap, rail, prev, next){
     });
   });
 
+  function showOrder(copied){
+    var n = $('#buyCopied', form);
+    if (!n) { return; }
+    n.textContent = copied
+      ? 'Текст заказа скопирован — вставьте его в чат и отправьте'
+      : 'Скопируйте текст заказа и отправьте его в чат: ' + orderText;
+    n.hidden = false;
+  }
+
+  function copyOrder(text){
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function(){ showOrder(true); },
+                                              function(){ showOrder(legacyCopy(text)); });
+      return;
+    }
+    showOrder(legacyCopy(text));
+  }
+
+  /* Старый способ: он работает и по http, там где clipboard недоступен. */
+  function legacyCopy(text){
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.cssText = 'position:fixed; top:0; left:-9999px; opacity:0';
+    document.body.appendChild(ta);
+    var ok = false;
+    try {
+      ta.select();
+      ta.setSelectionRange(0, text.length);
+      ok = document.execCommand('copy');
+    } catch(e){}
+    ta.remove();
+    return ok;
+  }
+
   svcSel.addEventListener('change', render);
   form.addEventListener('submit', function(e){ e.preventDefault(); });
   goBtn.addEventListener('click', function(e){
     if (goBtn.classList.contains('is-off')) { e.preventDefault(); return; }
-    /* Кладём заказ в буфер: в Телеграме останется вставить его одним нажатием,
-       и человеку не придётся вспоминать, что он выбирал. */
-    if (!CONFIG.cert.payUrl && orderText && navigator.clipboard) {
-      navigator.clipboard.writeText(orderText).then(function(){
-        var n = $('#buyCopied', form);
-        if (n) { n.hidden = false; }
-      }, function(){});
+    /* Кладём заказ в буфер: в мессенджере останется вставить его одним
+       нажатием, и человеку не придётся вспоминать, что он выбирал.
+
+       navigator.clipboard существует только на защищённом соединении. Пока
+       сайт открывается по http, его просто нет — заказ молча не копировался,
+       и человек попадал в переписку с пустым полем. Поэтому запасной путь
+       через скрытое поле и execCommand, а если не вышло и он — показываем
+       текст заказа прямо на странице, чтобы его можно было выделить руками. */
+    if (!CONFIG.cert.payUrl && orderText) {
+      copyOrder(orderText);
     }
   });
 
@@ -661,43 +721,6 @@ document.addEventListener('click', function(e){
   var offset = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 68;
   window.scrollTo({ top: t.getBoundingClientRect().top + window.scrollY - offset - 10, behavior:'smooth' });
 });
-
-/* ---------- Плашка про cookie ---------- */
-/* На сайте работает Метрика, значит cookie и IP собираются, и посетителя
-   об этом надо предупредить. Показываем один раз: отметка о согласии живёт
-   в localStorage этого браузера. Разметку создаём кодом — так плашка сразу
-   на всех страницах, которые собирает build.py.
-
-   Адрес политики берём из ссылки в подвале: сборка сама подставляет там
-   правильный путь для нужной глубины страницы. */
-(function(){
-  var KEY = 'cuerpo-cookie-ok';
-  var seen = false;
-  try { seen = localStorage.getItem(KEY) === '1'; } catch(e){}
-  if (seen) { return; }
-
-  var link = $('#lnkPolicy');
-  var href = link ? link.getAttribute('href') : '/politika/';
-
-  var box = document.createElement('div');
-  box.className = 'ctip';
-  box.setAttribute('role', 'note');
-  box.innerHTML = '<p>Мы собираем обезличенную статистику посещений, чтобы понимать, '
-                + 'какие разделы сайта полезны. Подробнее — в '
-                + '<a href="' + href + '">политике обработки данных</a>.</p>'
-                + '<button type="button">Хорошо</button>';
-  document.body.appendChild(box);
-
-  /* Небольшая задержка: плашка, выехавшая одновременно с первым экраном,
-     воспринимается как часть сайта и её не читают. */
-  setTimeout(function(){ box.classList.add('is-in'); }, 1200);
-
-  $('button', box).addEventListener('click', function(){
-    box.classList.remove('is-in');
-    try { localStorage.setItem(KEY, '1'); } catch(e){}
-    setTimeout(function(){ box.remove(); }, 500);
-  });
-})();
 
 /* ---------- Свой ползунок прокрутки ---------- */
 /* Системная полоса спрятана в стилях, здесь рисуем свою: линия заполняется

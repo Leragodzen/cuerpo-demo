@@ -12,16 +12,21 @@
 
    Композиция намеренно несимметричная: марка и текст прижаты
    влево, справа уходит за край монограмма, поверх всего идут
-   тонкие дуги. Прошлая версия была центрирована и в рамке —
-   это читалось как бланк, а не как подарок.
+   дуги. Прошлая версия была центрирована и в рамке — это
+   читалось как бланк, а не как подарок.
+
+   Кегли заданы крупно намеренно. Сертификат смотрят с экрана
+   телефона и чаще всего в пересланном сообщении, уменьшенным:
+   мелкая подпись там просто не читается. Всё, что меньше 26 px
+   на этом холсте, на телефоне превращается в серую полоску.
    ============================================================ */
 window.CuerpoCert = (function(){
 'use strict';
 
 var W = 1600, H = 1000;
-var PAPER='#FDFBF7', INK='#241F19', INK2='#6B6153', INK3='#9B9181',
-    GREEN='#5F7A50', DARK='#283321', SAND='#C9B08C';
-var PAD = 104;                       /* левое поле, от него живёт весь текст */
+var PAPER='#FDFBF7', INK='#1A1613', INK2='#4F463A', INK3='#8B8172',
+    GREEN='#4E6A40', DARK='#1F2A19', SAND='#C9B08C';
+var PAD = 108;                       /* левое поле, от него живёт весь текст */
 var MONTHS = ['января','февраля','марта','апреля','мая','июня',
               'июля','августа','сентября','октября','ноября','декабря'];
 
@@ -63,8 +68,8 @@ function wrap(ctx, text, max, size, weight){
   ctx.font = weight + ' ' + size + 'px "Cormorant Garamond"';
   if(ctx.measureText(text).width <= max){ return {size:size, lines:[text]}; }
 
-  while(size > 52 && ctx.measureText(text).width > max){
-    size -= 3;
+  while(size > 76 && ctx.measureText(text).width > max){
+    size -= 4;
     ctx.font = weight + ' ' + size + 'px "Cormorant Garamond"';
   }
   if(ctx.measureText(text).width <= max){ return {size:size, lines:[text]}; }
@@ -80,39 +85,43 @@ function wrap(ctx, text, max, size, weight){
 }
 
 /* Монограмма уходит за правый нижний угол. Обрезанная буква выглядит
-   как знак на бумаге, а вписанная целиком — как водяной знак на справке. */
+   как знак на бумаге, а вписанная целиком — как водяной знак на справке.
+   Цвет песочный, как и был: по нему сертификат узнаётся. */
 function monogram(ctx){
   ctx.save();
-  ctx.globalAlpha = 0.62;
+  ctx.globalAlpha = 0.58;
   ctx.fillStyle = SAND;
   ctx.textAlign = 'left';
-  ctx.font = 'italic 500 620px "Cormorant Garamond"';
-  ctx.fillText('C', 1140, 1120);
+  ctx.font = 'italic 500 900px "Cormorant Garamond"';
+  ctx.fillText('C', 960, 1276);
   ctx.restore();
 }
 
-/* Три дуги: две расходятся в правом верхнем углу, одна проходит
-   низом под всем текстом. Держатся подальше от левой колонки —
-   там живут сумма и подписи. */
+/* Дуги. Тонкие светлые линии прошлой версии пропадали при пересылке —
+   мессенджер жмёт картинку, и волосяная линия превращается в шум.
+   Теперь они тёмные и толстые: это и есть рисунок карточки.
+   Держатся правее текстовой колонки, нижняя проходит под текстом. */
 function arcs(ctx){
   ctx.save();
-  ctx.strokeStyle = SAND;
-  ctx.lineWidth = 3;
+  ctx.strokeStyle = DARK;
   ctx.lineCap = 'round';
 
+  ctx.lineWidth = 11;
   ctx.beginPath();
-  ctx.moveTo(600, -40);
-  ctx.bezierCurveTo(900, 200, 1180, 300, 1660, 300);
+  ctx.moveTo(700, -40);
+  ctx.bezierCurveTo(980, 210, 1220, 300, 1660, 286);
   ctx.stroke();
 
+  ctx.lineWidth = 8;
   ctx.beginPath();
-  ctx.moveTo(980, -40);
-  ctx.bezierCurveTo(1120, 260, 1340, 520, 1660, 690);
+  ctx.moveTo(1080, -40);
+  ctx.bezierCurveTo(1210, 280, 1400, 540, 1660, 706);
   ctx.stroke();
 
+  ctx.lineWidth = 11;
   ctx.beginPath();
-  ctx.moveTo(-40, 1030);
-  ctx.bezierCurveTo(500, 985, 1100, 1010, 1660, 700);
+  ctx.moveTo(-40, 1046);
+  ctx.bezierCurveTo(520, 1000, 1120, 1020, 1660, 700);
   ctx.stroke();
 
   ctx.restore();
@@ -132,29 +141,31 @@ function draw(cv, data){
 
   /* Марка */
   ctx.fillStyle = DARK;
-  ctx.font = 'italic 500 66px "Cormorant Garamond"';
-  ctx.fillText('Cuerpo', PAD, 158);
-  tracked(ctx, 'МАСТЕРСКАЯ ПО ТЕЛУ', PAD + 4, 196, 13, '300', INK3, 5);
+  ctx.font = 'italic 500 96px "Cormorant Garamond"';
+  ctx.fillText('Cuerpo', PAD, 162);
+  tracked(ctx, 'МАСТЕРСКАЯ ПО ТЕЛУ', PAD + 6, 212, 19, '400', INK3, 8);
 
   /* Что это за бумага */
-  tracked(ctx, 'ПОДАРОЧНЫЙ СЕРТИФИКАТ', PAD, 336, 16, '400', INK, 6);
+  tracked(ctx, 'ПОДАРОЧНЫЙ СЕРТИФИКАТ', PAD, 344, 26, '500', GREEN, 10);
 
   /* Главное — номинал или программа */
   var isSum = data.mode !== 'svc';
+  var whoY = 638;               /* сдвигается вниз, если название в две строки */
   if(isSum){
     var v = money(String(data.sum || '').replace(/\D/g, '')) || '0';
     ctx.fillStyle = DARK;
-    ctx.font = '500 136px "Cormorant Garamond"';
-    ctx.fillText(v + ' ₽', PAD, 486);
+    ctx.font = '600 220px "Cormorant Garamond"';
+    ctx.fillText(v + ' ₽', PAD, 556);
   } else {
-    var r = wrap(ctx, data.svc || '', 880, 82, '500');
+    var r = wrap(ctx, data.svc || '', 960, 116, '600');
     ctx.fillStyle = DARK;
-    ctx.font = '500 ' + r.size + 'px "Cormorant Garamond"';
-    var ly = r.lines.length > 1 ? 442 : 486;
+    ctx.font = '600 ' + r.size + 'px "Cormorant Garamond"';
+    var ly = r.lines.length > 1 ? 494 : 556;
     r.lines.forEach(function(ln){
       ctx.fillText(ln, PAD, ly);
-      ly += r.size + 12;
+      ly += r.size + 14;
     });
+    whoY = Math.max(whoY, ly - r.size + 48);
   }
 
   /* Кому и от кого — одной строкой, чтобы не наращивать этажи */
@@ -163,33 +174,44 @@ function draw(cv, data){
   if(data.from){ who.push('от ' + data.from); }
   if(who.length){
     ctx.fillStyle = INK2;
-    ctx.font = '300 27px "Jost"';
-    ctx.fillText(who.join('   ·   '), PAD, 570);
+    ctx.font = '400 38px "Jost"';
+    ctx.fillText(who.join('   ·   '), PAD, whoY);
   }
+
+  /* Короткая черта отделяет подарок от служебной части */
+  ctx.save();
+  ctx.strokeStyle = DARK;
+  ctx.lineWidth = 5;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(PAD, 708);
+  ctx.lineTo(PAD + 300, 708);
+  ctx.stroke();
+  ctx.restore();
 
   /* Что с этим делать */
   ctx.fillStyle = INK2;
-  ctx.font = '300 23px "Jost"';
-  ctx.fillText('Покажите сертификат администратору — можно прямо с экрана телефона.', PAD, 706);
+  ctx.font = '400 32px "Jost"';
+  ctx.fillText('Покажите сертификат администратору — можно прямо с экрана телефона.', PAD, 790);
 
   ctx.fillStyle = INK3;
-  ctx.font = '300 23px "Jost"';
-  ctx.fillText('Запись по телефону', PAD, 782);
+  ctx.font = '400 32px "Jost"';
+  ctx.fillText('Запись по телефону', PAD, 874);
   var lw = ctx.measureText('Запись по телефону ').width;
   ctx.fillStyle = GREEN;
-  ctx.font = '400 33px "Jost"';
-  ctx.fillText('+7 (927) 892-30-13', PAD + lw, 784);
+  ctx.font = '500 46px "Jost"';
+  ctx.fillText('+7 (927) 892-30-13', PAD + lw, 878);
 
   /* Номер и срок — то, что проверяет администратор */
   var meta = [];
   if(data.num){ meta.push('№ ' + data.num); }
   var t = dateRu(data.till);
   if(t){ meta.push('ДЕЙСТВИТЕЛЕН ДО ' + t.toUpperCase()); }
-  if(meta.length){ tracked(ctx, meta.join('   ·   '), PAD, 892, 15, '400', INK, 3); }
+  if(meta.length){ tracked(ctx, meta.join('   ·   '), PAD, 940, 22, '500', INK, 4); }
 
   ctx.fillStyle = INK3;
-  ctx.font = '300 20px "Jost"';
-  ctx.fillText('Тольятти, Приморский бульвар, 57', PAD, 936);
+  ctx.font = '400 27px "Jost"';
+  ctx.fillText('Тольятти, Приморский бульвар, 57', PAD, 980);
 }
 
 /* Шрифты грузятся из Google Fonts: без ожидания canvas успевает
@@ -197,10 +219,10 @@ function draw(cv, data){
 function ready(cb){
   if(!document.fonts || !document.fonts.load){ setTimeout(cb, 400); return; }
   Promise.all([
-    document.fonts.load('italic 500 66px "Cormorant Garamond"'),
-    document.fonts.load('500 136px "Cormorant Garamond"'),
-    document.fonts.load('300 23px "Jost"'),
-    document.fonts.load('400 33px "Jost"')
+    document.fonts.load('italic 500 96px "Cormorant Garamond"'),
+    document.fonts.load('600 220px "Cormorant Garamond"'),
+    document.fonts.load('400 32px "Jost"'),
+    document.fonts.load('500 46px "Jost"')
   ]).then(cb).catch(cb);
   document.fonts.ready.then(cb);
 }
