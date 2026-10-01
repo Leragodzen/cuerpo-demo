@@ -150,22 +150,22 @@ function draw(cv, data){
 
   /* Главное — номинал или программа */
   var isSum = data.mode !== 'svc';
-  var whoY = 638;               /* сдвигается вниз, если название в две строки */
+  var whoY = 676;               /* сдвигается вниз, если название в две строки */
   if(isSum){
     var v = money(String(data.sum || '').replace(/\D/g, '')) || '0';
     ctx.fillStyle = DARK;
     ctx.font = '600 220px "Cormorant Garamond"';
-    ctx.fillText(v + ' ₽', PAD, 556);
+    ctx.fillText(v + ' ₽', PAD, 548);
   } else {
     var r = wrap(ctx, data.svc || '', 960, 116, '600');
     ctx.fillStyle = DARK;
     ctx.font = '600 ' + r.size + 'px "Cormorant Garamond"';
-    var ly = r.lines.length > 1 ? 494 : 556;
+    var ly = r.lines.length > 1 ? 486 : 548;
     r.lines.forEach(function(ln){
       ctx.fillText(ln, PAD, ly);
       ly += r.size + 14;
     });
-    whoY = Math.max(whoY, ly - r.size + 48);
+    whoY = Math.max(whoY, ly - r.size + 56);
   }
 
   /* Кому и от кого — одной строкой, чтобы не наращивать этажи */
@@ -184,23 +184,23 @@ function draw(cv, data){
   ctx.lineWidth = 5;
   ctx.lineCap = 'round';
   ctx.beginPath();
-  ctx.moveTo(PAD, 708);
-  ctx.lineTo(PAD + 300, 708);
+  ctx.moveTo(PAD, 726);
+  ctx.lineTo(PAD + 300, 726);
   ctx.stroke();
   ctx.restore();
 
   /* Что с этим делать */
   ctx.fillStyle = INK2;
   ctx.font = '400 32px "Jost"';
-  ctx.fillText('Покажите сертификат администратору — можно прямо с экрана телефона.', PAD, 790);
+  ctx.fillText('Покажите сертификат администратору — можно прямо с экрана телефона.', PAD, 800);
 
   ctx.fillStyle = INK3;
   ctx.font = '400 32px "Jost"';
-  ctx.fillText('Запись по телефону', PAD, 874);
+  ctx.fillText('Запись по телефону', PAD, 876);
   var lw = ctx.measureText('Запись по телефону ').width;
   ctx.fillStyle = GREEN;
   ctx.font = '500 46px "Jost"';
-  ctx.fillText('+7 (927) 892-30-13', PAD + lw, 878);
+  ctx.fillText('+7 (927) 892-30-13', PAD + lw, 880);
 
   /* Номер и срок — то, что проверяет администратор */
   var meta = [];
