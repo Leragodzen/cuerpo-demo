@@ -842,7 +842,7 @@ def build_home_ld():
   "url": "%(site)s",
   "image": "%(site)sassets/img/og-cover.jpg",
   "telephone": "+7-927-892-30-13",
-  "priceRange": "900–6500 ₽",
+  "priceRange": "1100–10200 ₽",
   "currenciesAccepted": "RUB",
   "areaServed": "Тольятти",
   "aggregateRating": {
